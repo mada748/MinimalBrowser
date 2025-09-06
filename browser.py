@@ -55,7 +55,7 @@ class WebBrowser(QMainWindow):
         self.browser.urlChanged.connect(self.update_url_bar)
         self.browser.loadProgress.connect(self.update_progress)
         self.browser.titleChanged.connect(self.setWindowTitle)
-        DuckDuckGo_btn.triggered.connect(lambda: self.browser.setUrl(QUrl('https://duckduckgo.com')))
+        DuckDuckGo_btn.triggered.connect(lambda: self.browser.setUrl(QUrl('https://minimalbrowserhomepage.netlify.app/')))
         
         
         self.browser.setUrl(QUrl("https://duckduckgo.com"))
@@ -93,4 +93,5 @@ if __name__ == "__main__":
     main_window = WebBrowser()
     main_window.show()
     
+
     sys.exit(app.exec_())

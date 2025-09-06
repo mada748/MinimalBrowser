@@ -16,4 +16,5 @@ everthing is set up for running just run ```python3 browser.py```
 ## Things not implemented yet
 Tabs
 SSL/TLS certificate verification
+Downloads
 

@@ -58,7 +58,7 @@ class WebBrowser(QMainWindow):
         DuckDuckGo_btn.triggered.connect(lambda: self.browser.setUrl(QUrl('https://minimalbrowserhomepage.netlify.app/')))
         
         
-        self.browser.setUrl(QUrl("https://duckduckgo.com"))
+        self.browser.setUrl(QUrl("https://minimalbrowserhomepage.netlify.app/"))
 
     def navigate_to_url(self):
         """Loads the URL from the URL bar."""
@@ -95,3 +95,4 @@ if __name__ == "__main__":
     
 
     sys.exit(app.exec_())
+

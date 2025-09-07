@@ -1,5 +1,5 @@
 # MinimalBrowser
-a minimal browser for minimalist people
+a nonish chromium minial browser
 ## How to install
 ### Clone the repo
 frist you have to clone this repository bt doing
@@ -14,7 +14,6 @@ since this project doesn't use only python you have to install some dipencies by
 everthing is set up for running just run ```python3 browser.py```
 
 ## Things not implemented yet
-Tabs
 SSL/TLS certificate verification
 Downloads
 

@@ -1,5 +1,6 @@
 # MinimalBrowser
-a nonish chromium minial browser
+a non-ish chromium minimal browser
+https://minimalsite-zeta.vercel.app
 ## How to install
 ### Clone the repo
 frist you have to clone this repository bt doing

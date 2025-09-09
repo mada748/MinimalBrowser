@@ -1,11 +1,11 @@
 import sys
 from PyQt5.QtCore import QUrl
-from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QLineEdit, QAction, QTabWidget, QMessageBox
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QLineEdit, QAction, QTabWidget, QMessageBox, QVBoxLayout, QWidget, QListWidget, QListWidgetItem, QFileDialog, QPushButton, QHBoxLayout
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineProfile, QWebEngineDownloadItem
 
 class WebBrowser(QMainWindow):
     """
-    A simple web browser with a tabbed interface.
+    A simple web browser with a tabbed interface, bookmarks, and downloads.
     """
     def __init__(self):
         super().__init__()
@@ -13,13 +13,16 @@ class WebBrowser(QMainWindow):
         self.setWindowTitle("PyQtWebEngine Browser")
         self.setGeometry(100, 100, 1000, 700)
         
-        # Create the tab widget
+        # Bookmarks data structure
+        self.bookmarks = {}
+        
+        # tab widget
         self.tabs = QTabWidget()
         self.tabs.setDocumentMode(True)
         self.tabs.setTabsClosable(True)
         self.setCentralWidget(self.tabs)
         
-        # Connect signals for tab management
+        # tab management
         self.tabs.tabCloseRequested.connect(self.close_current_tab)
         self.tabs.currentChanged.connect(self.current_tab_changed)
         
@@ -54,12 +57,21 @@ class WebBrowser(QMainWindow):
         homepage_btn.triggered.connect(lambda: self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/')))
         self.navigation_bar.addAction(homepage_btn)
         
+        # Bookmark actions
+        add_bookmark_btn = QAction("Add Bookmark", self)
+        add_bookmark_btn.triggered.connect(self.add_bookmark)
+        self.navigation_bar.addAction(add_bookmark_btn)
+        
+        show_bookmarks_btn = QAction("Bookmarks", self)
+        show_bookmarks_btn.triggered.connect(self.show_bookmarks_list)
+        self.navigation_bar.addAction(show_bookmarks_btn)
+        
         # URL bar
         self.url_bar = QLineEdit()
         self.url_bar.returnPressed.connect(self.navigate_to_url)
         self.navigation_bar.addWidget(self.url_bar)
         
-        # Add the first tab
+        
         self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/'))
         
     def new_tab(self, qurl=None):
@@ -68,15 +80,16 @@ class WebBrowser(QMainWindow):
             qurl = QUrl('https://minimalbrowserhomepage.netlify.app/')
             
         browser = QWebEngineView()
+       
+        browser.setUrl(qurl)
+        
         index = self.tabs.addTab(browser, "New Tab")
         self.tabs.setCurrentIndex(index)
         
-        browser.setUrl(qurl)
-        
-        # Connect signals for the new browser instance
-        browser.urlChanged.connect(lambda url: self.update_url_bar(url, browser))
-        browser.loadProgress.connect(lambda progress: self.update_progress(progress, browser))
-        browser.titleChanged.connect(lambda title: self.tabs.setTabText(self.tabs.indexOf(browser), title))
+        browser.urlChanged.connect(lambda url, browser=browser: self.update_url_bar(url, browser))
+        browser.loadProgress.connect(lambda progress, browser=browser: self.update_progress(progress, browser))
+        browser.titleChanged.connect(lambda title, browser=browser: self.tabs.setTabText(self.tabs.indexOf(browser), title))
+        browser.iconChanged.connect(lambda icon, browser=browser: self.tabs.setTabIcon(self.tabs.indexOf(browser), icon))
     
     def navigate_to_url(self):
         """Loads the URL from the URL bar in the current tab."""
@@ -117,7 +130,7 @@ class WebBrowser(QMainWindow):
         """Updates the status bar with the loading progress."""
         if browser != self.tabs.currentWidget():
             return
-            
+        
         if progress < 100:
             self.statusBar().showMessage(f"Loading... {progress}%")
         else:
@@ -146,17 +159,75 @@ class WebBrowser(QMainWindow):
         current_browser = self.tabs.currentWidget()
         if current_browser:
             current_browser.stop()
+    
+    def add_bookmark(self):
+        """Adds the current page to bookmarks."""
+        current_browser = self.tabs.currentWidget()
+        if current_browser:
+            url = current_browser.url().toString()
+            title = current_browser.title()
+            if url not in self.bookmarks:
+                self.bookmarks[url] = title
+                QMessageBox.information(self, "Bookmark Added", f"Added '{title}' to bookmarks.")
+            else:
+                QMessageBox.warning(self, "Bookmark Exists", "This page is already bookmarked.")
 
+    def show_bookmarks_list(self):
+        """Displays a list of bookmarks."""
+        # boookmarks window
+        self.bookmark_window = QWidget()
+        self.bookmark_window.setWindowTitle("Bookmarks")
+        self.bookmark_window.setGeometry(200, 200, 400, 300)
+        
+        main_layout = QVBoxLayout()
+        list_layout = QVBoxLayout()
+        button_layout = QHBoxLayout()
+        
+        self.bookmark_list = QListWidget()
+        
+        for url, title in self.bookmarks.items():
+            item = QListWidgetItem(f"{title} - {url}")
+            item.setData(1, url)  
+            self.bookmark_list.addItem(item)
+            
+        self.bookmark_list.itemClicked.connect(lambda item: self.open_bookmark(item.data(1)))
+        
+        delete_button = QPushButton("Delete Bookmark")
+        delete_button.clicked.connect(self.delete_bookmark)
+        
+        button_layout.addStretch(1)
+        button_layout.addWidget(delete_button)
+        button_layout.addStretch(1)
+        
+        list_layout.addWidget(self.bookmark_list)
+        
+        main_layout.addLayout(list_layout)
+        main_layout.addLayout(button_layout)
+        
+        self.bookmark_window.setLayout(main_layout)
+        self.bookmark_window.show()
+
+    def delete_bookmark(self):
+        """Deletes the selected bookmark."""
+        selected_item = self.bookmark_list.currentItem()
+        if selected_item:
+            url_to_delete = selected_item.data(1)
+            del self.bookmarks[url_to_delete]
+            self.bookmark_list.takeItem(self.bookmark_list.row(selected_item))
+            QMessageBox.information(self, "Bookmark Deleted", "Bookmark has been successfully deleted.")
+        else:
+            QMessageBox.warning(self, "No Bookmark Selected", "Please select a bookmark to delete.")
+
+    def open_bookmark(self, url):
+        """Opens a bookmarked URL in a new tab."""
+        self.new_tab(QUrl(url))
+        
 # Main application
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setApplicationName("PyQtWebEngine Browser")
+    app.setApplicationName("Minimalist")
     
     main_window = WebBrowser()
     main_window.show()
     
     sys.exit(app.exec_())
-
-    sys.exit(app.exec_())
-
-

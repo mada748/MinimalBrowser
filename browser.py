@@ -54,7 +54,7 @@ class WebBrowser(QMainWindow):
         
         # Homepage button
         homepage_btn = QAction("Homepage", self)
-        homepage_btn.triggered.connect(lambda: self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/')))
+        homepage_btn.triggered.connect(lambda: self.new_tab(QUrl('https://minimal-browser-simple-search-engine-code.onrender.com/')))
         self.navigation_bar.addAction(homepage_btn)
         
         # Bookmark actions
@@ -72,12 +72,12 @@ class WebBrowser(QMainWindow):
         self.navigation_bar.addWidget(self.url_bar)
         
         
-        self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/'))
+        self.new_tab(QUrl('https://minimal-browser-simple-search-engine-code.onrender.com/'))
         
     def new_tab(self, qurl=None):
         """Adds a new tab with an optional URL."""
         if qurl is None:
-            qurl = QUrl('https://minimalbrowserhomepage.netlify.app/')
+            qurl = QUrl('https://minimal-browser-simple-search-engine-code.onrender.com/')
             
         browser = QWebEngineView()
        
@@ -231,3 +231,4 @@ if __name__ == "__main__":
     main_window.show()
     
     sys.exit(app.exec_())
+

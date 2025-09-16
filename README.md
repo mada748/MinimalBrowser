@@ -2,6 +2,8 @@
 a non-ish chromium minimal browser
 https://minimalsite-zeta.vercel.app
 ## How to install
+##Windows guide
+Go to <a href="https://www.mediafire.com/file/0e731vhbg9uqj7w/browser.exe/file">This link</a> (since github doesn't support files more large then 25MB i have to do this with mediafire)
 ### Clone the repo
 frist you have to clone this repository bt doing
 ```git clone https://github.com/mada748/MinimalBrowser```

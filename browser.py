@@ -1,7 +1,74 @@
 import sys
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QUrl, Qt
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineProfile
+from PyQt5.QtWebEngineCore import QWebEngineUrlRequestInterceptor
+from PyQt5.QtCore import QUrl, Qt, pyqtSignal, QObject
 from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QLineEdit, QAction, QMessageBox, QVBoxLayout, QWidget, QListWidget, QListWidgetItem, QPushButton, QHBoxLayout, QStackedWidget, QDockWidget
+from PyQt5.QtNetwork import QSslSocket, QSslConfiguration, QSslError
+
+# Simple class for handling download stuff
+class CustomWebEngineView(QWebEngineView):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        # Try certificate
+        self.page().certificateError.connect(self.handle_certificate_error)
+        self.page().profile().downloadRequested.connect(self.handle_download)
+
+    # If certificate errors it will prompt user
+    def handle_certificate_error(self, certificate_error):
+        reply = QMessageBox.question(
+            self,
+            "SSL Certificate Error",
+            f"SSL Certificate Error: {certificate_error.errorDescription()}\n"
+            f"URL: {certificate_error.url().toString()}\n\n"
+            "Do you want to proceed anyway? (Not recommended)",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if reply == QMessageBox.Yes:
+            certificate_error.ignoreCertificateError()
+        else:
+            certificate_error.rejectCertificate()
+
+    # Handle Download stuff
+    # Prompts user with info etc upon prompt
+    def handle_download(self, download):
+        reply = QMessageBox.question(
+            self,
+            "Download File",
+            f"Do you want to download:\n{download.url().fileName()}\n"
+            f"Size: {download.totalBytes()} bytes\n"
+            f"From: {download.url().host()}",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes
+        )
+
+        if reply == QMessageBox.Yes:
+            download.accept()
+            download.finished.connect(lambda: self.download_finished(download))
+            download.downloadProgress.connect(lambda received, total: self.update_download_progress(download, received, total))
+        else:
+            download.cancel()
+
+    # info once download finished (with error handling)
+    def download_finished(self, download):
+        if download.state() == download.DownloadCompleted:
+            QMessageBox.information(
+                self,
+                "Download Complete",
+                f"Successfully downloaded: {download.url().fileName()}\n"
+                f"Saved to: {download.path()}"
+            )
+        elif download.state() == download.DownloadCancelled:
+            QMessageBox.information(self, "Download Cancelled", "Download was cancelled.")
+        else:
+            QMessageBox.warning(self, "Download Failed", "Download failed or was interrupted.")
+
+    # Simple sub process which shows a download status bar
+    def update_download_progress(self, download, received, total):
+        if total > 0:
+            progress = int((received / total) * 100)
+            self.parent().statusBar().showMessage(f"Downloading {download.url().fileName()}: {progress}%")
 
 class WebBrowser(QMainWindow):
     """
@@ -105,8 +172,8 @@ class WebBrowser(QMainWindow):
         """Adds a new tab with an optional URL."""
         if qurl is None:
             qurl = QUrl('https://minimalbrowserhomepage.netlify.app/')
-        
-        browser = QWebEngineView()
+
+        browser = CustomWebEngineView(self)
         browser.setUrl(qurl)
         
         

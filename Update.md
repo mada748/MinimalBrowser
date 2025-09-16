@@ -6,3 +6,5 @@ we have added tabs i hope you will like it
 we have officialy added the favicon of the site you visit and bookmars and the site of the browser
 # Modified the homepage 
 i have modified the site of the homepage so know it request to the duckduckgo api to search the thing you want
+# Sidebar and old homepage
+i have rolled back to the old homepag since i don't like much the new homepage and also you got a sidebar you can toggle it and i dunno is a sidebar

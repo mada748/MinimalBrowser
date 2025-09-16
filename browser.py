@@ -1,11 +1,11 @@
 import sys
-from PyQt5.QtCore import QUrl
-from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QLineEdit, QAction, QTabWidget, QMessageBox, QVBoxLayout, QWidget, QListWidget, QListWidgetItem, QFileDialog, QPushButton, QHBoxLayout
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineProfile, QWebEngineDownloadItem
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtCore import QUrl, Qt
+from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QLineEdit, QAction, QMessageBox, QVBoxLayout, QWidget, QListWidget, QListWidgetItem, QPushButton, QHBoxLayout, QStackedWidget, QDockWidget
 
 class WebBrowser(QMainWindow):
     """
-    A simple web browser with a tabbed interface, bookmarks, and downloads.
+    A web browser with a toggleable sidebar for tabs, bookmarks, and downloads.
     """
     def __init__(self):
         super().__init__()
@@ -15,18 +15,45 @@ class WebBrowser(QMainWindow):
         
         # Bookmarks data structure
         self.bookmarks = {}
+
         
-        # tab widget
-        self.tabs = QTabWidget()
-        self.tabs.setDocumentMode(True)
-        self.tabs.setTabsClosable(True)
-        self.setCentralWidget(self.tabs)
+        self.web_view_stack = QStackedWidget()
+        self.setCentralWidget(self.web_view_stack)
+
         
-        # tab management
-        self.tabs.tabCloseRequested.connect(self.close_current_tab)
-        self.tabs.currentChanged.connect(self.current_tab_changed)
+        self.sidebar_dock = QDockWidget("Tabs", self)
+        # Sidebar not flying away from the browser window
+        self.sidebar_dock.setFeatures(QDockWidget.NoDockWidgetFeatures)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.sidebar_dock)
+        self.sidebar_dock.setFixedWidth(200)
+
         
-        # Create navigation toolbar
+        sidebar_content_widget = QWidget()
+        sidebar_layout = QVBoxLayout(sidebar_content_widget)
+
+        # Sidebar  tabs
+        self.tab_list_widget = QListWidget()
+        self.tab_list_widget.itemClicked.connect(self.select_tab_from_sidebar)
+        
+        # New tab button 
+        new_tab_btn_sidebar = QPushButton("New Tab")
+        new_tab_btn_sidebar.clicked.connect(lambda: self.new_tab())
+        
+        # Remove tab button 
+        remove_tab_btn_sidebar = QPushButton("Remove Tab")
+        remove_tab_btn_sidebar.clicked.connect(self.remove_current_tab)
+
+        # Layout for new tab and remove tab buttons
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(new_tab_btn_sidebar)
+        button_layout.addWidget(remove_tab_btn_sidebar)
+
+        sidebar_layout.addWidget(self.tab_list_widget)
+        sidebar_layout.addLayout(button_layout)
+        
+        self.sidebar_dock.setWidget(sidebar_content_widget)
+
+        # navigation toolbar
         self.navigation_bar = QToolBar("Navigation")
         self.addToolBar(self.navigation_bar)
         
@@ -47,14 +74,14 @@ class WebBrowser(QMainWindow):
         stop_btn.triggered.connect(self.stop_tab)
         self.navigation_bar.addAction(stop_btn)
 
-        # New tab button
-        new_tab_btn = QAction("New Tab", self)
-        new_tab_btn.triggered.connect(lambda: self.new_tab())
-        self.navigation_bar.addAction(new_tab_btn)
+        # Toggle sidebar button
+        toggle_sidebar_btn = QAction("Toggle Sidebar", self)
+        toggle_sidebar_btn.triggered.connect(self.sidebar_dock.toggleViewAction().trigger)
+        self.navigation_bar.addAction(toggle_sidebar_btn)
         
         # Homepage button
         homepage_btn = QAction("Homepage", self)
-        homepage_btn.triggered.connect(lambda: self.new_tab(QUrl('https://minimal-browser-simple-search-engine-code.onrender.com/')))
+        homepage_btn.triggered.connect(lambda: self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/')))
         self.navigation_bar.addAction(homepage_btn)
         
         # Bookmark actions
@@ -71,29 +98,70 @@ class WebBrowser(QMainWindow):
         self.url_bar.returnPressed.connect(self.navigate_to_url)
         self.navigation_bar.addWidget(self.url_bar)
         
-        
-        self.new_tab(QUrl('https://minimal-browser-simple-search-engine-code.onrender.com/'))
+        # homepage
+        self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/'))
         
     def new_tab(self, qurl=None):
         """Adds a new tab with an optional URL."""
         if qurl is None:
-            qurl = QUrl('https://minimal-browser-simple-search-engine-code.onrender.com/')
-            
+            qurl = QUrl('https://minimalbrowserhomepage.netlify.app/')
+        
         browser = QWebEngineView()
-       
         browser.setUrl(qurl)
         
-        index = self.tabs.addTab(browser, "New Tab")
-        self.tabs.setCurrentIndex(index)
+        
+        index = self.web_view_stack.addWidget(browser)
+        
+        
+        item = QListWidgetItem("New Tab")
+        self.tab_list_widget.addItem(item)
+        
+        # Set the current tab
+        self.web_view_stack.setCurrentIndex(index)
+        self.tab_list_widget.setCurrentItem(item)
         
         browser.urlChanged.connect(lambda url, browser=browser: self.update_url_bar(url, browser))
         browser.loadProgress.connect(lambda progress, browser=browser: self.update_progress(progress, browser))
-        browser.titleChanged.connect(lambda title, browser=browser: self.tabs.setTabText(self.tabs.indexOf(browser), title))
-        browser.iconChanged.connect(lambda icon, browser=browser: self.tabs.setTabIcon(self.tabs.indexOf(browser), icon))
+        browser.titleChanged.connect(lambda title, browser=browser: self.tab_list_widget.item(self.web_view_stack.indexOf(browser)).setText(title))
+        browser.iconChanged.connect(lambda icon, browser=browser: self.tab_list_widget.item(self.web_view_stack.indexOf(browser)).setIcon(icon))
+
+    def remove_current_tab(self):
+        """Removes the current tab from the browser."""
+        if self.web_view_stack.count() < 2:
+            QMessageBox.warning(self, "Cannot Close Tab", "You must have at least one tab open.")
+            return
+
+        current_index = self.web_view_stack.currentIndex()
+        
+        
+        widget_to_remove = self.web_view_stack.widget(current_index)
+        self.web_view_stack.removeWidget(widget_to_remove)
+        widget_to_remove.deleteLater()
+        
+        
+        self.tab_list_widget.takeItem(current_index)
+        
+       
+        if self.web_view_stack.count() > 0:
+            if current_index >= self.web_view_stack.count():
+                new_index = self.web_view_stack.count() - 1
+            else:
+                new_index = current_index
+            self.web_view_stack.setCurrentIndex(new_index)
+            self.tab_list_widget.setCurrentRow(new_index)
+
+    def select_tab_from_sidebar(self, item):
+        """Changes the current web view based on the selected sidebar item."""
+        index = self.tab_list_widget.row(item)
+        self.web_view_stack.setCurrentIndex(index)
+        current_browser = self.web_view_stack.currentWidget()
+        if current_browser:
+            self.update_url_bar(current_browser.url(), current_browser)
+            self.setWindowTitle(current_browser.title())
     
     def navigate_to_url(self):
         """Loads the URL from the URL bar in the current tab."""
-        current_browser = self.tabs.currentWidget()
+        current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             url_text = self.url_bar.text()
             if not url_text:
@@ -106,21 +174,27 @@ class WebBrowser(QMainWindow):
             
     def close_current_tab(self, index):
         """Closes the current tab."""
-        if self.tabs.count() < 2:
+        if self.web_view_stack.count() < 2:
             return
             
-        self.tabs.removeTab(index)
-    
+        
+        widget_to_remove = self.web_view_stack.widget(index)
+        self.web_view_stack.removeWidget(widget_to_remove)
+        widget_to_remove.deleteLater()
+        
+        
+        self.tab_list_widget.takeItem(index)
+
     def current_tab_changed(self, index):
         """Updates the UI when the current tab changes."""
-        current_browser = self.tabs.currentWidget()
+        current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             self.update_url_bar(current_browser.url(), current_browser)
             self.setWindowTitle(current_browser.title())
 
     def update_url_bar(self, url, browser=None):
         """Updates the URL bar with the current page URL."""
-        if browser != self.tabs.currentWidget():
+        if browser != self.web_view_stack.currentWidget():
             return
         
         self.url_bar.setText(url.toString())
@@ -128,7 +202,7 @@ class WebBrowser(QMainWindow):
 
     def update_progress(self, progress, browser=None):
         """Updates the status bar with the loading progress."""
-        if browser != self.tabs.currentWidget():
+        if browser != self.web_view_stack.currentWidget():
             return
         
         if progress < 100:
@@ -138,31 +212,31 @@ class WebBrowser(QMainWindow):
 
     def back_to_tab(self):
         """Goes back in the current tab's history."""
-        current_browser = self.tabs.currentWidget()
+        current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             current_browser.back()
             
     def forward_on_tab(self):
         """Goes forward in the current tab's history."""
-        current_browser = self.tabs.currentWidget()
+        current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             current_browser.forward()
 
     def reload_tab(self):
         """Reloads the current tab."""
-        current_browser = self.tabs.currentWidget()
+        current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             current_browser.reload()
 
     def stop_tab(self):
         """Stops loading the current tab."""
-        current_browser = self.tabs.currentWidget()
+        current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             current_browser.stop()
     
     def add_bookmark(self):
         """Adds the current page to bookmarks."""
-        current_browser = self.tabs.currentWidget()
+        current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             url = current_browser.url().toString()
             title = current_browser.title()
@@ -231,4 +305,3 @@ if __name__ == "__main__":
     main_window.show()
     
     sys.exit(app.exec_())
-

@@ -1,3 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+</head>
+<body>
+<h1>Test</h1>
+
+</body>
+</html>
 # MinimalBrowser
 a non-ish chromium minimal browser
 https://minimalsite-zeta.vercel.app

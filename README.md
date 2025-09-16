@@ -15,7 +15,7 @@ do ```sudo apt update``` and ```sudo apt install python3-venv```
 ### executing venv
 for executing venv you need to run ```python3 -m venv my_env``` and ```source my_env/bin/activate```
 ### Downloading dipedinces
-since this project doesn't use only python you have to install some dipencies by doing ```pip install PyQt5 PyQtWebEngine```
+since this project doesn't use only python you have to install some dipencies by doing ```pip install -r requirements.txt```
 ### Run the program :D
 everthing is set up for running just run ```python3 browser.py```
 

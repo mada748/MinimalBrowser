@@ -1,49 +1,203 @@
 import sys
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+import os
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineProfile
+from PyQt5.QtWebEngineCore import QWebEngineUrlRequestInfo, QWebEngineUrlRequestInterceptor
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QLineEdit, QAction, QMessageBox, QVBoxLayout, QWidget, QListWidget, QListWidgetItem, QPushButton, QHBoxLayout, QStackedWidget, QDockWidget
 
+class AdBlockerInterceptor(QWebEngineUrlRequestInterceptor):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.ad_domains = [
+            "static.xx.fbcdn.net",
+            "scontent.xx.fna.fbcdn.net",
+            "cdn.taboola.com",
+            "cdn.outbrain.com",
+            "rtb.criteo.com",
+            "contextual.media.net",
+            "aax-us-east.amazon-adsystem.com",
+            "googleads.g.doubleclick.net",
+            "www.googletagservices.com",
+            "www.google-analytics.com",
+            "adservice.google.com",
+            "ad.doubleclick.net",
+            "afs.googlesyndication.com",
+            "stats.g.doubleclick.net",
+            "m.doublecklick.net",
+            "static.doublecklick.net",
+            "meadiavisor.doubleclick.net",
+            "ads30.adcolony.com",
+            "adc3.adconoly.com",
+            "events3alt.adcolony.com",
+            "wd.adcolony.com",
+            "static.media.net",
+            "media.net",
+            "adtago.s3.amazonaws.com",
+            "https://bat.bing.com/bat.js",
+            "https://static.ads-twitter.com/uwt.js",
+            "https://connect.facebook.net/en_US/fbevents.js",
+            "analyticsengine.s3.amazonaws.com",
+            "analytics.s3.amazonaws.com",
+            "advice-ads.s3.amazonaws.com",
+            "advice-ads.s3.amazonaws.com",
+            "pagead2.googleadservices.com",
+            "adc3-launch.adcolony.com",
+            "static.doubleclick.net",
+            "m.doubleclick.net",
+            "mediavisor.doubleclick.net",
+            "analytics.google.com",
+            "adm.hotjar.com",
+            "click.googleanalytics.com",
+            "pagead2.googlesyndication.com",
+            "google-analytics.com",
+            "ssl.google-analytics.com",
+            "identify.hotjar.com",
+            "insights.hotjar.com",
+            "script.hotjar.com",
+            "surveys.hotjar.com",
+            "careers.hotjar.com",
+            "cdn.mouseflow.com",
+            "o2.mouseflow.com",
+            "freshmarketer.com",
+            "claritybt.freshmarketer.com",
+            "fwtracks.freshmarketer.com",
+            "cdn-test.mouseflow.com",
+            "stats.wp.com",
+            "luckyorange.com",
+            "api.luckyorange.com",
+            "realtime.luckyorange.com",
+            "cdn.luckyorange.com",
+            "w1.luckyorange.com",
+            "upload.luckyorange.net",
+            "cs.luckyorange.net",
+            "settings.luckyorange.net",
+            "notify.bugsnag.com",
+            "sessions.bugsnag.com",
+            "api.bugsnag.com",
+            "app.bugsnag.com",
+            "browser.sentry-cdn.com",
+            "app.getsentry.com",
+            "tools.mouseflow.com",
+            "pixel.facebook.com",
+            "an.facebook.com",
+            "static.ads-twitter.com",
+            "ads-api.twitter.com",
+            "ads.linkedin.com",
+            "analytics.pointdrive.linkedin.com",
+            "ads.pinterest.com",
+            "log.pinterest.com",
+            "analytics.pinterest.com",
+            "trk.pinterest.com",
+            "events.reddit.com",
+            "events.redditmedia.com",
+            "ads.youtube.com",
+            "ads-api.tiktok.com",
+            "analytics.tiktok.com",
+            "ads-sg.tiktok.com",
+            "analytics-sg.tiktok.com",
+            "business-api.tiktok.com",
+            "ads.tiktok.com",
+            "log.byteoversea.com",
+            "ads.yahoo.com",
+            "analytics.yahoo.com",
+            "geo.yahoo.com",
+            "udcm.yahoo.com",
+            "analytics.query.yahoo.com",
+            "partnerads.ysm.yahoo.com",
+            "log.fc.yahoo.com",
+            "gemini.yahoo.com",
+            "adtech.yahooinc.com",
+            "appmetrica.yandex.ru",
+            "adfstat.yandex.ru",
+            "metrika.yandex.ru",
+            "adfox.yandex.ru",
+            "auction.unityads.unity3d.com",
+            "webview.unityads.unity3d.com",
+            "config.unityads.unity3d.com",
+            "adserver.unityads.unity3d.com",
+            "iot-eu-logser.realme.com",
+            "iot-logser.realme.com",
+            "bdapi-ads.realmemobile.com",
+            "bdapi-in-ads.realmemobile.com",
+            "api.ad.xiaomi.com",
+            "data.mistat.xiaomi.com",
+            "data.mistat.india.xiaomi.com",
+            "data.mistat.rus.xiaomi.com",
+            "sdkconfig.ad.xiaomi.com",
+            "sdkconfig.ad.intl.xiaomi.com",
+            "tracking.rus.miui.com",
+            "adsfs.oppomobile.com",
+            "adx.ads.oppomobile.com",
+            "ck.ads.oppomobile.com",
+            "data.ads.oppomobile.com",
+            "metrics.data.hicloud.com",
+            "metrics2.data.hicloud.com",
+            "grs.hicloud.com",
+            "logservice.hicloud.com",
+            "logservice1.hicloud.com",
+            "logbak.hicloud.com",
+            "iadsdk.apple.com",
+            "metrics.icloud.com",
+            "metrics.mzstatic.com",
+            "api-adservices.apple.com",
+            "books-analytics-events.apple.com",
+            "weather-analytics-events.apple.com",
+            "notes-analytics-events.apple.com",
+            "samsungads.com",
+            "smetrics.samsung.com",
+            "samsung-com.112.2o7.net",
+            "analytics-api.samsunghealthcn.com",
+            "widgets.pinterest.com",
+            "extmaps-api.yandex.net",
+            "advretising.yandex.ru",
+            "offerwall.yandex.net",
+            "udc.yahoo.com",
+            "advretising.yahoo.com",
+            "advertising.apple.com"
+        ]
+
+    def interceptRequest(self, info: QWebEngineUrlRequestInfo):
+        url = info.requestUrl().host()
+        if any(ad_domain in url for ad_domain in self.ad_domains):
+            print("AdBlocker: Blocking request to", url)
+            info.block(True)
+
 class WebBrowser(QMainWindow):
-    """
-    A web browser with a toggleable sidebar for tabs, bookmarks, and downloads.
-    """
     def __init__(self):
         super().__init__()
         
         self.setWindowTitle("PyQtWebEngine Browser")
         self.setGeometry(100, 100, 1000, 700)
         
-        # Bookmarks data structure
         self.bookmarks = {}
-
         
+        self.profile = QWebEngineProfile.defaultProfile()
+        self.profile.setPersistentCookiesPolicy(QWebEngineProfile.ForcePersistentCookies)
+        self.profile.setPersistentStoragePath(os.path.join(os.path.expanduser('~'), '.minimal_browser_data'))
+        
+        self.interceptor = AdBlockerInterceptor(self.profile)
+        self.profile.setUrlRequestInterceptor(self.interceptor)
+
         self.web_view_stack = QStackedWidget()
         self.setCentralWidget(self.web_view_stack)
 
-        
         self.sidebar_dock = QDockWidget("Tabs", self)
-        # Sidebar not flying away from the browser window
         self.sidebar_dock.setFeatures(QDockWidget.NoDockWidgetFeatures)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.sidebar_dock)
         self.sidebar_dock.setFixedWidth(200)
 
-        
         sidebar_content_widget = QWidget()
         sidebar_layout = QVBoxLayout(sidebar_content_widget)
 
-        # Sidebar  tabs
         self.tab_list_widget = QListWidget()
         self.tab_list_widget.itemClicked.connect(self.select_tab_from_sidebar)
         
-        # New tab button 
         new_tab_btn_sidebar = QPushButton("New Tab")
         new_tab_btn_sidebar.clicked.connect(lambda: self.new_tab())
         
-        # Remove tab button 
         remove_tab_btn_sidebar = QPushButton("Remove Tab")
         remove_tab_btn_sidebar.clicked.connect(self.remove_current_tab)
 
-        # Layout for new tab and remove tab buttons
         button_layout = QHBoxLayout()
         button_layout.addWidget(new_tab_btn_sidebar)
         button_layout.addWidget(remove_tab_btn_sidebar)
@@ -53,11 +207,9 @@ class WebBrowser(QMainWindow):
         
         self.sidebar_dock.setWidget(sidebar_content_widget)
 
-        # navigation toolbar
         self.navigation_bar = QToolBar("Navigation")
         self.addToolBar(self.navigation_bar)
         
-        # Navigation actions
         back_btn = QAction("Back", self)
         back_btn.triggered.connect(self.back_to_tab)
         self.navigation_bar.addAction(back_btn)
@@ -74,17 +226,14 @@ class WebBrowser(QMainWindow):
         stop_btn.triggered.connect(self.stop_tab)
         self.navigation_bar.addAction(stop_btn)
 
-        # Toggle sidebar button
         toggle_sidebar_btn = QAction("Toggle Sidebar", self)
         toggle_sidebar_btn.triggered.connect(self.sidebar_dock.toggleViewAction().trigger)
         self.navigation_bar.addAction(toggle_sidebar_btn)
         
-        # Homepage button
         homepage_btn = QAction("Homepage", self)
         homepage_btn.triggered.connect(lambda: self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/')))
         self.navigation_bar.addAction(homepage_btn)
         
-        # Bookmark actions
         add_bookmark_btn = QAction("Add Bookmark", self)
         add_bookmark_btn.triggered.connect(self.add_bookmark)
         self.navigation_bar.addAction(add_bookmark_btn)
@@ -93,30 +242,24 @@ class WebBrowser(QMainWindow):
         show_bookmarks_btn.triggered.connect(self.show_bookmarks_list)
         self.navigation_bar.addAction(show_bookmarks_btn)
         
-        # URL bar
         self.url_bar = QLineEdit()
         self.url_bar.returnPressed.connect(self.navigate_to_url)
         self.navigation_bar.addWidget(self.url_bar)
         
-        # homepage
         self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/'))
         
     def new_tab(self, qurl=None):
-        """Adds a new tab with an optional URL."""
         if qurl is None:
             qurl = QUrl('https://minimalbrowserhomepage.netlify.app/')
         
         browser = QWebEngineView()
         browser.setUrl(qurl)
         
-        
         index = self.web_view_stack.addWidget(browser)
-        
         
         item = QListWidgetItem("New Tab")
         self.tab_list_widget.addItem(item)
         
-        # Set the current tab
         self.web_view_stack.setCurrentIndex(index)
         self.tab_list_widget.setCurrentItem(item)
         
@@ -126,22 +269,18 @@ class WebBrowser(QMainWindow):
         browser.iconChanged.connect(lambda icon, browser=browser: self.tab_list_widget.item(self.web_view_stack.indexOf(browser)).setIcon(icon))
 
     def remove_current_tab(self):
-        """Removes the current tab from the browser."""
         if self.web_view_stack.count() < 2:
             QMessageBox.warning(self, "Cannot Close Tab", "You must have at least one tab open.")
             return
 
         current_index = self.web_view_stack.currentIndex()
         
-        
         widget_to_remove = self.web_view_stack.widget(current_index)
         self.web_view_stack.removeWidget(widget_to_remove)
         widget_to_remove.deleteLater()
         
-        
         self.tab_list_widget.takeItem(current_index)
         
-       
         if self.web_view_stack.count() > 0:
             if current_index >= self.web_view_stack.count():
                 new_index = self.web_view_stack.count() - 1
@@ -151,7 +290,6 @@ class WebBrowser(QMainWindow):
             self.tab_list_widget.setCurrentRow(new_index)
 
     def select_tab_from_sidebar(self, item):
-        """Changes the current web view based on the selected sidebar item."""
         index = self.tab_list_widget.row(item)
         self.web_view_stack.setCurrentIndex(index)
         current_browser = self.web_view_stack.currentWidget()
@@ -160,7 +298,6 @@ class WebBrowser(QMainWindow):
             self.setWindowTitle(current_browser.title())
     
     def navigate_to_url(self):
-        """Loads the URL from the URL bar in the current tab."""
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             url_text = self.url_bar.text()
@@ -173,27 +310,22 @@ class WebBrowser(QMainWindow):
             current_browser.setUrl(QUrl(url_text))
             
     def close_current_tab(self, index):
-        """Closes the current tab."""
         if self.web_view_stack.count() < 2:
             return
             
-        
         widget_to_remove = self.web_view_stack.widget(index)
         self.web_view_stack.removeWidget(widget_to_remove)
         widget_to_remove.deleteLater()
         
-        
         self.tab_list_widget.takeItem(index)
 
     def current_tab_changed(self, index):
-        """Updates the UI when the current tab changes."""
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             self.update_url_bar(current_browser.url(), current_browser)
             self.setWindowTitle(current_browser.title())
 
     def update_url_bar(self, url, browser=None):
-        """Updates the URL bar with the current page URL."""
         if browser != self.web_view_stack.currentWidget():
             return
         
@@ -201,7 +333,6 @@ class WebBrowser(QMainWindow):
         self.url_bar.setCursorPosition(0)
 
     def update_progress(self, progress, browser=None):
-        """Updates the status bar with the loading progress."""
         if browser != self.web_view_stack.currentWidget():
             return
         
@@ -211,31 +342,26 @@ class WebBrowser(QMainWindow):
             self.statusBar().showMessage("Done", 2000)
 
     def back_to_tab(self):
-        """Goes back in the current tab's history."""
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             current_browser.back()
             
     def forward_on_tab(self):
-        """Goes forward in the current tab's history."""
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             current_browser.forward()
 
     def reload_tab(self):
-        """Reloads the current tab."""
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             current_browser.reload()
 
     def stop_tab(self):
-        """Stops loading the current tab."""
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             current_browser.stop()
     
     def add_bookmark(self):
-        """Adds the current page to bookmarks."""
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             url = current_browser.url().toString()
@@ -247,8 +373,6 @@ class WebBrowser(QMainWindow):
                 QMessageBox.warning(self, "Bookmark Exists", "This page is already bookmarked.")
 
     def show_bookmarks_list(self):
-        """Displays a list of bookmarks."""
-        # boookmarks window
         self.bookmark_window = QWidget()
         self.bookmark_window.setWindowTitle("Bookmarks")
         self.bookmark_window.setGeometry(200, 200, 400, 300)
@@ -261,7 +385,7 @@ class WebBrowser(QMainWindow):
         
         for url, title in self.bookmarks.items():
             item = QListWidgetItem(f"{title} - {url}")
-            item.setData(1, url)  
+            item.setData(1, url) 
             self.bookmark_list.addItem(item)
             
         self.bookmark_list.itemClicked.connect(lambda item: self.open_bookmark(item.data(1)))
@@ -282,7 +406,6 @@ class WebBrowser(QMainWindow):
         self.bookmark_window.show()
 
     def delete_bookmark(self):
-        """Deletes the selected bookmark."""
         selected_item = self.bookmark_list.currentItem()
         if selected_item:
             url_to_delete = selected_item.data(1)
@@ -293,10 +416,8 @@ class WebBrowser(QMainWindow):
             QMessageBox.warning(self, "No Bookmark Selected", "Please select a bookmark to delete.")
 
     def open_bookmark(self, url):
-        """Opens a bookmarked URL in a new tab."""
         self.new_tab(QUrl(url))
         
-# Main application
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setApplicationName("Minimalist")
@@ -305,3 +426,5 @@ if __name__ == "__main__":
     main_window.show()
     
     sys.exit(app.exec_())
+    sys.exit(app.exec_())
+

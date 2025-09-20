@@ -6,15 +6,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineDownloadItem
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QLineEdit, QAction, QMessageBox, QVBoxLayout, QWidget, QListWidget, QListWidgetItem, QPushButton, QHBoxLayout, QStackedWidget, QDockWidget, QFileDialog, QProgressBar, QLabel
 
-a = "1"
-error = False
 
-while 1 in a:
-    if ERROR == True:
-        print("Critical Error: 728 Exiting with code 2...")
-        exit(2)
-    else:
-        print("")
 
  
 
@@ -514,5 +506,6 @@ if __name__ == "__main__":
     
     sys.exit(app.exec_())
     sys.exit(app.exec_())
+
 
 

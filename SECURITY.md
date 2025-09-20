@@ -17,5 +17,5 @@ Do not use AI for researching vurnelabilities as it could say lies or not even b
 
 Many options here but the main ones are:
 | Discord | seedyproduction  |
-|Github   | private messages |
+| Github  | private messages |
 

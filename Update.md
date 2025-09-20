@@ -12,3 +12,5 @@ i have rolled back to the old homepage since i don't like much the new homepage 
 why not?
 # 20/09/2025 Added downloads and other stuff
 added downloads,comments and the fact who when you remove the last page the browser closes
+# 29/09/2025 Licensed and secriuty
+we have officialy put a <a href="https://github.com/mada748/MinimalBrowser/blob/main/LICENSE">MIT LICENSE</a> on this project and uploaded guidelines on how to report a vurnelabilite in the code

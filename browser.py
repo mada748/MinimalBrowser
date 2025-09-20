@@ -2,13 +2,27 @@ import sys
 import os
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineProfile
 from PyQt5.QtWebEngineCore import QWebEngineUrlRequestInfo, QWebEngineUrlRequestInterceptor
+from PyQt5.QtWebEngineWidgets import QWebEngineDownloadItem
 from PyQt5.QtCore import QUrl, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QLineEdit, QAction, QMessageBox, QVBoxLayout, QWidget, QListWidget, QListWidgetItem, QPushButton, QHBoxLayout, QStackedWidget, QDockWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QLineEdit, QAction, QMessageBox, QVBoxLayout, QWidget, QListWidget, QListWidgetItem, QPushButton, QHBoxLayout, QStackedWidget, QDockWidget, QFileDialog, QProgressBar, QLabel
+
+a = "1"
+error = False
+
+while 1 in a:
+    if ERROR == True:
+        print("Critical Error: 728 Exiting with code 2...")
+        exit(2)
+    else:
+        print("")
+
+ 
 
 class AdBlockerInterceptor(QWebEngineUrlRequestInterceptor):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ad_domains = [
+            # Juicy ad list
             "static.xx.fbcdn.net",
             "scontent.xx.fna.fbcdn.net",
             "cdn.taboola.com",
@@ -155,11 +169,11 @@ class AdBlockerInterceptor(QWebEngineUrlRequestInterceptor):
             "advretising.yahoo.com",
             "advertising.apple.com"
         ]
-
-    def interceptRequest(self, info: QWebEngineUrlRequestInfo):
+    # adblocker logic btw
+    def interceptRequest(self, info: QWebEngineUrlRequestInfo):# the code works who the dablocker says if you are X ad domain im gonna shoot
         url = info.requestUrl().host()
-        if any(ad_domain in url for ad_domain in self.ad_domains):
-            print("AdBlocker: Blocking request to", url)
+        if any(ad_domain in url for ad_domain in self.ad_domains):# since the site doesn't respond it checks if he needs to shoot
+            print("AdBlocker: Blocking request to", url)# and if yes it shoots
             info.block(True)
 
 class WebBrowser(QMainWindow):
@@ -177,6 +191,9 @@ class WebBrowser(QMainWindow):
         
         self.interceptor = AdBlockerInterceptor(self.profile)
         self.profile.setUrlRequestInterceptor(self.interceptor)
+
+        # Connecting downloading stuff do not matter
+        self.profile.downloadRequested.connect(self.handle_download_requested)
 
         self.web_view_stack = QStackedWidget()
         self.setCentralWidget(self.web_view_stack)
@@ -205,39 +222,49 @@ class WebBrowser(QMainWindow):
         sidebar_layout.addWidget(self.tab_list_widget)
         sidebar_layout.addLayout(button_layout)
         
-        self.sidebar_dock.setWidget(sidebar_content_widget)
+        # - buttons and navigation -
 
+        # navigation bar
+        self.sidebar_dock.setWidget(sidebar_content_widget)
         self.navigation_bar = QToolBar("Navigation")
         self.addToolBar(self.navigation_bar)
         
+        # back
         back_btn = QAction("Back", self)
         back_btn.triggered.connect(self.back_to_tab)
         self.navigation_bar.addAction(back_btn)
-
+        
+        # going forward (only works if you pressed self.back_to_tab)
         forward_btn = QAction("Forward", self)
         forward_btn.triggered.connect(self.forward_on_tab)
         self.navigation_bar.addAction(forward_btn)
-
+        
+        # realoading
         reload_btn = QAction("Reload", self)
         reload_btn.triggered.connect(self.reload_tab)
         self.navigation_bar.addAction(reload_btn)
         
+        # stop loading
         stop_btn = QAction("Stop", self)
         stop_btn.triggered.connect(self.stop_tab)
         self.navigation_bar.addAction(stop_btn)
 
+        # Sidebar 
         toggle_sidebar_btn = QAction("Toggle Sidebar", self)
         toggle_sidebar_btn.triggered.connect(self.sidebar_dock.toggleViewAction().trigger)
         self.navigation_bar.addAction(toggle_sidebar_btn)
         
+        # homepage
         homepage_btn = QAction("Homepage", self)
         homepage_btn.triggered.connect(lambda: self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/')))
         self.navigation_bar.addAction(homepage_btn)
         
+        # Bookmarking (what term is even this)
         add_bookmark_btn = QAction("Add Bookmark", self)
         add_bookmark_btn.triggered.connect(self.add_bookmark)
         self.navigation_bar.addAction(add_bookmark_btn)
         
+        # Bookmarks 
         show_bookmarks_btn = QAction("Bookmarks", self)
         show_bookmarks_btn.triggered.connect(self.show_bookmarks_list)
         self.navigation_bar.addAction(show_bookmarks_btn)
@@ -245,6 +272,9 @@ class WebBrowser(QMainWindow):
         self.url_bar = QLineEdit()
         self.url_bar.returnPressed.connect(self.navigate_to_url)
         self.navigation_bar.addWidget(self.url_bar)
+        
+        # - New tab stuff -
+
         
         self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/'))
         
@@ -259,6 +289,7 @@ class WebBrowser(QMainWindow):
         
         item = QListWidgetItem("New Tab")
         self.tab_list_widget.addItem(item)
+
         
         self.web_view_stack.setCurrentIndex(index)
         self.tab_list_widget.setCurrentItem(item)
@@ -267,10 +298,13 @@ class WebBrowser(QMainWindow):
         browser.loadProgress.connect(lambda progress, browser=browser: self.update_progress(progress, browser))
         browser.titleChanged.connect(lambda title, browser=browser: self.tab_list_widget.item(self.web_view_stack.indexOf(browser)).setText(title))
         browser.iconChanged.connect(lambda icon, browser=browser: self.tab_list_widget.item(self.web_view_stack.indexOf(browser)).setIcon(icon))
-
+        
+    # - Removing tab stuff (work in progress) -   
     def remove_current_tab(self):
         if self.web_view_stack.count() < 2:
-            QMessageBox.warning(self, "Cannot Close Tab", "You must have at least one tab open.")
+            QMessageBox.information(self, "Tab Menager", "Last tab closed extiting with code 0...")
+            SHUTDOWN = True
+            exit()
             return
 
         current_index = self.web_view_stack.currentIndex()
@@ -298,6 +332,7 @@ class WebBrowser(QMainWindow):
             self.setWindowTitle(current_browser.title())
     
     def navigate_to_url(self):
+        self.Httpwarning()
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             url_text = self.url_bar.text()
@@ -308,7 +343,25 @@ class WebBrowser(QMainWindow):
                 url_text = "http://" + url_text
             
             current_browser.setUrl(QUrl(url_text))
-            
+
+    def Httpwarning(self):
+        current_browser = self.web_view_stack.currentWidget()
+        try:
+            current_browser.setUrl(QUrl(url_text))
+        except UnboundLocalError:
+            print("SiteProtection: ERROR 984 - UnBound Local Error")
+            return            
+        url_text = self.url.bar.text()
+        if not url_text:
+                        print("SiteProtection: ERROR 657 - unable to check url")
+                        return
+
+
+        if self.url_text.startwith("http://"):
+            QMessageBox.warning(self, "Insecure Connection", "The site", url_text, "is not safe and it may track or steal your data.")
+            print("SteProtection: Warning user conneecting to insecure site", url_text)
+        
+
     def close_current_tab(self, index):
         if self.web_view_stack.count() < 2:
             return
@@ -385,39 +438,71 @@ class WebBrowser(QMainWindow):
         
         for url, title in self.bookmarks.items():
             item = QListWidgetItem(f"{title} - {url}")
-            item.setData(1, url) 
+            item.setData(0, url)
             self.bookmark_list.addItem(item)
-            
-        self.bookmark_list.itemClicked.connect(lambda item: self.open_bookmark(item.data(1)))
         
-        delete_button = QPushButton("Delete Bookmark")
-        delete_button.clicked.connect(self.delete_bookmark)
-        
-        button_layout.addStretch(1)
-        button_layout.addWidget(delete_button)
-        button_layout.addStretch(1)
+        self.bookmark_list.itemDoubleClicked.connect(self.open_bookmark)
         
         list_layout.addWidget(self.bookmark_list)
-        
         main_layout.addLayout(list_layout)
-        main_layout.addLayout(button_layout)
         
         self.bookmark_window.setLayout(main_layout)
         self.bookmark_window.show()
 
-    def delete_bookmark(self):
-        selected_item = self.bookmark_list.currentItem()
-        if selected_item:
-            url_to_delete = selected_item.data(1)
-            del self.bookmarks[url_to_delete]
-            self.bookmark_list.takeItem(self.bookmark_list.row(selected_item))
-            QMessageBox.information(self, "Bookmark Deleted", "Bookmark has been successfully deleted.")
-        else:
-            QMessageBox.warning(self, "No Bookmark Selected", "Please select a bookmark to delete.")
-
-    def open_bookmark(self, url):
+    def open_bookmark(self, item):
+        url = item.data(0)
         self.new_tab(QUrl(url))
+
+    def handle_download_requested(self, download):
+        suggested_filename = download.downloadFileName()
         
+        # Ask user where to save
+        path, _ = QFileDialog.getSaveFileName(self, "Save File", suggested_filename)
+        if path:
+            download.setPath(path)
+            download.accept()
+
+            # Create a download widget
+            download_widget = QWidget()
+            layout = QVBoxLayout(download_widget)
+            label = QLabel(f"Downloading: {os.path.basename(path)}")
+            progress_bar = QProgressBar()
+            progress_bar.setValue(0)
+            layout.addWidget(label)
+            layout.addWidget(progress_bar)
+            
+            # Add to download window
+            if not hasattr(self, 'download_window') or not self.download_window:
+                self.download_window = QWidget()
+                self.download_window.setWindowTitle("Downloads")
+                self.download_window.setGeometry(300, 300, 400, 300)
+                self.download_layout = QVBoxLayout(self.download_window)
+                self.download_window.setLayout(self.download_layout)
+
+            self.download_layout.addWidget(download_widget)
+            self.download_window.show()
+
+            # Update progress
+            download.downloadProgress.connect(lambda received, total: self.update_download_progress(progress_bar, received, total))
+            download.finished.connect(lambda: self.download_finished(download, progress_bar, label))
+        else:
+            download.cancel()
+
+    def update_download_progress(self, progress_bar, received, total):
+        if total > 0:
+            progress = int((received / total) * 100)
+            progress_bar.setValue(progress)
+
+    def download_finished(self, download, progress_bar, label):
+        if download.state() == download.DownloadCompleted:
+            label.setText(f"Download completed: {os.path.basename(download.path())}")
+            print("Download", {os.path.basename(download.path())}, "In", {download.path()})
+            QMessageBox.information(self, "Download Completed", f"File saved to:\n{download.path()}")
+        elif download.state() == download.DownloadCancelled:
+            label.setText("Download cancelled.")
+        elif download.state() == download.DownloadInterrupted:
+            label.setText("Download interrupted.")
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setApplicationName("Minimalist")
@@ -426,5 +511,8 @@ if __name__ == "__main__":
     main_window.show()
     
     sys.exit(app.exec_())
+    
     sys.exit(app.exec_())
+    sys.exit(app.exec_())
+
 

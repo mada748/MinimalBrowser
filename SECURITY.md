@@ -16,6 +16,8 @@ Do not use AI for researching vurnelabilities as it could say lies or not even b
 # How to report
 
 Many options here but the main ones are:
-| Discord | seedyproduction  |
-| Github  | private messages |
+| Contacts | Usernames/ methods |
+| -------- | ------------------ |
+| Discord  | seedyproduction    |
+| Github   | private messages   |
 

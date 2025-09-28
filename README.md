@@ -4,7 +4,7 @@ a non-ish chromium minimal browser
 https://minimalsite-zeta.vercel.app
 ## How to install
 ## Windows Guide
-Go to <a href="https://www.mediafire.com/file/0e731vhbg9uqj7w/browser.exe/file">This link</a> (since github doesn't support files more large then 25MB i have to do this with mediafire)
+Go to <a href="https://github.com/mada748/MinimalBrowser/releases/download/Iwasforcedtodothistag/browser.exe">This link</a> 
 and execute the file :D
 ## Linux Guide
 ### Clone the repo

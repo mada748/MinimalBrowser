@@ -7,6 +7,9 @@ https://minimalsite-zeta.vercel.app
 Go to <a href="https://github.com/mada748/MinimalBrowser/releases/download/Iwasforcedtodothistag/browser.exe">This link</a> 
 and execute the file :D
 ## Linux Guide
+## Universal Guide
+clone the release of the linux app by doing 
+## Python Guide
 ### Clone the repo
 frist you have to clone this repository bt doing
 ```git clone https://github.com/mada748/MinimalBrowser```

@@ -12,13 +12,13 @@ clone the release of the linux app by doing
 ```git clone https://github.com/mada748/MinimalBrowser/releases/download/linux/browser_linux```
 ## Python Guide
 ### Clone the repo
-frist you have to clone this repository bt doing
-```git clone https://github.com/mada748/MinimalBrowser```
+frist you have to clone the py file by doing
+```git clone https://github.com/mada748/MinimalBrowser/releases/download/linux/browser_py.py```
 ### Install venv
 do ```sudo apt update``` and ```sudo apt install python3-venv```
 ### executing venv
 for executing venv you need to run ```python3 -m venv my_env``` and ```source my_env/bin/activate```
-### Downloading dipedinces
+### Downloading dependinces
 since this project doesn't use only python you have to install some dipencies by doing ```pip install PyQt5 PyQtWebEngine```
 ### Run the program :D
 everthing is set up for running just run ```python3 browser.py```

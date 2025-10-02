@@ -9,6 +9,7 @@ and execute the file :D
 ## Linux Guide
 ## Universal Guide
 clone the release of the linux app by doing 
+```git clone https://github.com/mada748/MinimalBrowser/releases/download/linux/browser_linux```
 ## Python Guide
 ### Clone the repo
 frist you have to clone this repository bt doing

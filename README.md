@@ -31,9 +31,9 @@ To use The Safe Way And Review the Code manually by doing:
 <br>
 Or You can use the not very safe but quick way by doing
 
-> ```curl -s https://raw.githubusercontent.com/mada748/StoneCode-Assets/main/install_ubuntu.bash | bash```
+> ```curl -s https://stonecode-assets.netlify.app/install_ubuntu.bash | bash```
 
-> If you are using fedora do ```curl -s https://raw.githubusercontent.com/mada748/StoneCode-Assets/main/install_fedora.bash | bash```
+> If you are using fedora do ```curl -s https://stonecode-assets.netlify.app/install_fedora.bash | bash```
 
 > i: Is better to use the safe way so you can see for issues or maybe some viruses since i have the weakiest password ever
 

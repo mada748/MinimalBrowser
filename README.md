@@ -19,7 +19,7 @@ To use The Safe Way And Review the Code manually by doing:
 
 > ```chmod +x install.bash```
 
-> ```./install_ubuntu.bash```
+> ```./install.bash```
 
 > i: if you are suing fedora do
 >    ```curl -o install.bash https://stonecode-assets.netlify.app/install_fedora.bash```

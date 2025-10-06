@@ -10,6 +10,33 @@ and execute the file :D
 ## Universal Guide
 clone the release of the linux app by doing 
 ```git clone https://github.com/mada748/MinimalBrowser/releases/download/linux/browser_linux```
+## "Bash" Way Guide
+now using bash you have two options:
+To use The Safe Way And Review the Code manually by doing:
+> ```curl -o install.bash https://stonecode-assets.netlify.app/install_ubuntu.bash```
+
+> ```less install.bash```
+
+> ```chmod +x install.bash```
+
+> ```./install_ubuntu.bash```
+
+> i: if you are suing fedora do
+>    ```curl -o install.bash https://stonecode-assets.netlify.app/install_fedora.bash```
+
+>and then do the others commands 
+
+
+
+<br>
+Or You can use the not very safe but quick way by doing
+
+> ```curl -s https://raw.githubusercontent.com/mada748/StoneCode-Assets/main/install_ubuntu.bash | bash```
+
+> If you are using fedora do ```curl -s https://raw.githubusercontent.com/mada748/StoneCode-Assets/main/install_fedora.bash | bash```
+
+> i: Is better to use the safe way so you can see for issues or maybe some viruses since i have the weakiest password ever
+
 ## Python Guide
 ### Clone the repo
 frist you have to clone the py file by doing

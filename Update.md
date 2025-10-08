@@ -21,4 +21,4 @@ Sirs and ladies we got A new Update Experimental Page on the <a href="https://mi
 <br>
 <img src="https://stonecode-assets.netlify.app/Screenshot.png">
 # 8/10/2025 New <a href="https://github.com/mada748/MinimalBrowser/discussions">Discussion Page</a>
-hey we got Discussions or MInimal Discussion if you want an introduction go to <a href="https://github.com/mada748/MinimalBrowser/discussions/2">This Link</a> And taht's all i got i swear i will add new features on weekend
+hey we got Discussions or MInimal Discussion if you want an introduction go to <a href="https://github.com/mada748/MinimalBrowser/discussions/2">This Link</a> And that's all i got i swear i will add new features on weekend

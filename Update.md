@@ -22,3 +22,5 @@ Sirs and ladies we got A new Update Experimental Page on the <a href="https://mi
 <img src="https://stonecode-assets.netlify.app/Screenshot.png">
 # 8/10/2025 New <a href="https://github.com/mada748/MinimalBrowser/discussions">Discussion Page</a>
 hey we got Discussions or MInimal Discussion if you want an introduction go to <a href="https://github.com/mada748/MinimalBrowser/discussions/2">This Link</a> And that's all i got i swear i will add new features on weekend
+#  24/10/2025 <a href="https://gitlab.com/stonecoding1/MinimalBrowser">MINIMALBROWSER</a> IS ON GITLAB!
+hey gusy we got <a href="https://gitlab.com/stonecoding1/MinimalBrowser">Gitlab Repository</a> so if you want to switch to gitlab instead of github you are welcome! Also btw plz suggest features im going insane

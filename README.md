@@ -1,4 +1,4 @@
-<img src="https://minimalsite-zeta.vercel.app/browser.png">
+<img src="https://stonecode-assets.netlify.app/browser.png">
 
 
 

@@ -1,4 +1,4 @@
-
+<img src="https://minimalsite-zeta.vercel.app/browser.png">
 # MinimalBrowser
 a non-ish chromium minimal browser
 https://minimalsite-zeta.vercel.app

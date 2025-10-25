@@ -1,7 +1,14 @@
 <img src="https://minimalsite-zeta.vercel.app/browser.png">
-# MinimalBrowser
+
+
+
+
+
+ MinimalBrowser
 a non-ish chromium minimal browser
 https://minimalsite-zeta.vercel.app
+[![Better Stack Badge](https://uptime.betterstack.com/status-badges/v2/monitor/27tcg.svg)](https://uptime.betterstack.com/?utm_source=status_badge)
+
 ## How to install
 ## Windows Guide
 Go to <a href="https://github.com/mada748/MinimalBrowser/releases/download/Iwasforcedtodothistag/browser.exe">This link</a> 

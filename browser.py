@@ -7,14 +7,10 @@ from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QLineEdit, QAction, QMessageBox, QVBoxLayout, QWidget, QListWidget, QListWidgetItem, QPushButton, QHBoxLayout, QStackedWidget, QDockWidget, QFileDialog, QProgressBar, QLabel
 
 
-
- 
-
 class AdBlockerInterceptor(QWebEngineUrlRequestInterceptor):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ad_domains = [
-            # Juicy ad list
             "static.xx.fbcdn.net",
             "scontent.xx.fna.fbcdn.net",
             "cdn.taboola.com",
@@ -168,6 +164,31 @@ class AdBlockerInterceptor(QWebEngineUrlRequestInterceptor):
             print("AdBlocker: Blocking request to", url)# and if yes it shoots
             info.block(True)
 
+class DevToolsWindow(QMainWindow):
+    """A separate window for the DevTools QWebEngineView."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Developer Tools")
+        self.setGeometry(150, 150, 800, 600)
+        self.dev_tools_view = QWebEngineView()
+        self.setCentralWidget(self.dev_tools_view)
+        # Handle close event to simply hide the window instead of destroying it
+        self.setAttribute(Qt.WA_DeleteOnClose, False)
+        # Store a reference to the main browser for toggling
+        self.main_browser = parent
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_F12 and self.main_browser:
+            # Tell the main window to toggle the DevTools
+            self.main_browser.toggle_dev_tools()
+        super().keyPressEvent(event)
+
+    def closeEvent(self, event):
+        if self.main_browser and self.main_browser.dev_tools_window.isVisible():
+            self.main_browser.toggle_dev_tools()
+        event.ignore()
+
+
 class WebBrowser(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -214,7 +235,7 @@ class WebBrowser(QMainWindow):
         sidebar_layout.addWidget(self.tab_list_widget)
         sidebar_layout.addLayout(button_layout)
         
-        # - buttons and navigation -
+        # --- buttons and navigation ---
 
         # navigation bar
         self.sidebar_dock.setWidget(sidebar_content_widget)
@@ -261,13 +282,20 @@ class WebBrowser(QMainWindow):
         show_bookmarks_btn.triggered.connect(self.show_bookmarks_list)
         self.navigation_bar.addAction(show_bookmarks_btn)
         
+
+        self.dev_tools_action = QAction("Toggle DevTools", self)
+        self.dev_tools_action.triggered.connect(self.toggle_dev_tools)
+        # shourtcut F12 
+        self.dev_tools_action.setShortcut(Qt.Key_F12) 
+        self.addAction(self.dev_tools_action) 
+
         self.url_bar = QLineEdit()
         self.url_bar.returnPressed.connect(self.navigate_to_url)
         self.navigation_bar.addWidget(self.url_bar)
         
-        # - New tab stuff -
+        self.dev_tools_window = DevToolsWindow(self)
 
-        
+        # - New tab stuff -
         self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/'))
         
     def new_tab(self, qurl=None):
@@ -291,10 +319,33 @@ class WebBrowser(QMainWindow):
         browser.titleChanged.connect(lambda title, browser=browser: self.tab_list_widget.item(self.web_view_stack.indexOf(browser)).setText(title))
         browser.iconChanged.connect(lambda icon, browser=browser: self.tab_list_widget.item(self.web_view_stack.indexOf(browser)).setIcon(icon))
         
+        self.web_view_stack.currentChanged.connect(self.current_tab_changed)
+        
+    # devtools let's gooooooooooooooooooooooo
+    def toggle_dev_tools(self):
+        current_browser = self.web_view_stack.currentWidget()
+        if not current_browser:
+            return
+    
+        if self.dev_tools_window.isVisible():
+            current_browser.page().setDevToolsPage(None)
+            self.dev_tools_window.hide()
+            
+            # btw this is a fix beacuse after closing devtools 
+            current_browser.setFocus()
+        else:
+            current_browser.page().setDevToolsPage(self.dev_tools_window.dev_tools_view.page())
+            self.dev_tools_window.show()
+            self.dev_tools_window.activateWindow() 
+
+
     # - Removing tab stuff (work in progress) -   
     def remove_current_tab(self):
         if self.web_view_stack.count() < 2:
             QMessageBox.information(self, "Tab Menager", "Last tab closed extiting with code 0...")
+            # If DevTools is open, close it before exiting
+            if self.dev_tools_window.isVisible():
+                self.toggle_dev_tools() 
             SHUTDOWN = True
             exit()
             return
@@ -302,6 +353,10 @@ class WebBrowser(QMainWindow):
         current_index = self.web_view_stack.currentIndex()
         
         widget_to_remove = self.web_view_stack.widget(current_index)
+        
+        if self.dev_tools_window.isVisible() and widget_to_remove.page() == self.web_view_stack.currentWidget().page():
+             self.toggle_dev_tools()
+
         self.web_view_stack.removeWidget(widget_to_remove)
         widget_to_remove.deleteLater()
         
@@ -318,42 +373,30 @@ class WebBrowser(QMainWindow):
     def select_tab_from_sidebar(self, item):
         index = self.tab_list_widget.row(item)
         self.web_view_stack.setCurrentIndex(index)
-        current_browser = self.web_view_stack.currentWidget()
-        if current_browser:
-            self.update_url_bar(current_browser.url(), current_browser)
-            self.setWindowTitle(current_browser.title())
-    
+
     def navigate_to_url(self):
-        self.Httpwarning()
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             url_text = self.url_bar.text()
             if not url_text:
                 return
 
+            # Check for HTTP warning before navigating
+            self.Httpwarning(url_text)
+
             if not url_text.startswith(("http://", "https://")):
-                url_text = "http://" + url_text
+                if '.' not in url_text and ' ' in url_text:
+                    url_text = f"https://duckduckgo.com/?q={url_text}"
+                else:
+                    url_text = "http://" + url_text
             
             current_browser.setUrl(QUrl(url_text))
 
-    def Httpwarning(self):
-        current_browser = self.web_view_stack.currentWidget()
-        try:
-            current_browser.setUrl(QUrl(url_text))
-        except UnboundLocalError:
-            print("SiteProtection: ERROR 984 - UnBound Local Error")
-            return            
-        url_text = self.url.bar.text()
-        if not url_text:
-                        print("SiteProtection: ERROR 657 - unable to check url")
-                        return
-
-
-        if self.url_text.startwith("http://"):
-            QMessageBox.warning(self, "Insecure Connection", "The site", url_text, "is not safe and it may track or steal your data.")
-            print("SteProtection: Warning user conneecting to insecure site", url_text)
+    def Httpwarning(self, url_text):
+        if url_text.startswith("http://"):
+            QMessageBox.warning(self, "Insecure Connection", f"The site {url_text} is not safe and it may track or steal your data.")
+            print(f"SiteProtection: Warning user conneecting to insecure site {url_text}")
         
-
     def close_current_tab(self, index):
         if self.web_view_stack.count() < 2:
             return
@@ -369,6 +412,12 @@ class WebBrowser(QMainWindow):
         if current_browser:
             self.update_url_bar(current_browser.url(), current_browser)
             self.setWindowTitle(current_browser.title())
+            
+            # devs tools scary!
+            if self.dev_tools_window.isVisible():
+                current_browser.page().setDevToolsPage(self.dev_tools_window.dev_tools_view.page())
+
+
 
     def update_url_bar(self, url, browser=None):
         if browser != self.web_view_stack.currentWidget():
@@ -444,6 +493,7 @@ class WebBrowser(QMainWindow):
     def open_bookmark(self, item):
         url = item.data(0)
         self.new_tab(QUrl(url))
+        self.bookmark_window.close() # Close bookmark window after opening
 
     def handle_download_requested(self, download):
         suggested_filename = download.downloadFileName()
@@ -503,9 +553,4 @@ if __name__ == "__main__":
     main_window.show()
     
     sys.exit(app.exec_())
-    
-    sys.exit(app.exec_())
-    sys.exit(app.exec_())
-
-
 

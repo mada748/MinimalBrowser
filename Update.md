@@ -24,3 +24,8 @@ Sirs and ladies we got A new Update Experimental Page on the <a href="https://mi
 hey we got Discussions or MInimal Discussion if you want an introduction go to <a href="https://github.com/mada748/MinimalBrowser/discussions/2">This Link</a> And that's all i got i swear i will add new features on weekend
 #  24/10/2025 <a href="https://gitlab.com/stonecoding1/MinimalBrowser">MINIMALBROWSER</a> IS ON GITLAB!
 hey gusy we got <a href="https://gitlab.com/stonecoding1/MinimalBrowser">Gitlab Repository</a> so if you want to switch to gitlab instead of github you are welcome! Also btw plz suggest features im going insane
+# 30/10/2025 <a href="https://github.com/mada748/MinimalBrowser/releases/tag/devtool">WE GOT DEVTOOLS GUSY</a>
+DEV TOOLS LET'S GO WE ARE GONNA HAVE DEV TOOLS THIS HAS TAKEN SO LONG AND ALSO PLEASE SUGGEST FEATURES I DO NOT KNOW WHAT TO DO I DUNNO GO TO DISCUSSIONS AND CONTACT @mada748 I DUNNO IM JUST UNEMPLOYED AND I DO NOT HAVE A LIFE
+
+
+`devtools = True`

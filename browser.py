@@ -385,10 +385,10 @@ class WebBrowser(QMainWindow):
             self.Httpwarning(url_text)
 
             if not url_text.startswith(("http://", "https://")):
-                if '.' not in url_text and ' ' in url_text:
-                    url_text = f"https://duckduckgo.com/?q={url_text}"
-                else:
-                    url_text = "http://" + url_text
+                print("using duckduckgo api")
+                url_text = "https://duckduckgo.com/?q=" + url_text
+            else:
+                print("reaching website")
             
             current_browser.setUrl(QUrl(url_text))
 
@@ -553,4 +553,3 @@ if __name__ == "__main__":
     main_window.show()
     
     sys.exit(app.exec_())
-

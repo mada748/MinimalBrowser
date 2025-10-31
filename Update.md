@@ -29,3 +29,11 @@ DEV TOOLS LET'S GO WE ARE GONNA HAVE DEV TOOLS THIS HAS TAKEN SO LONG AND ALSO P
 
 
 `devtools = True`
+#  31/10/2025 <a href="https://github.com/mada748/MinimalBrowser/releases/tag/bug-fixes">Bug Fixes</a>
+some bug fixes mainly involving
+
+`            if not url_text.startswith(("http://", "https://")):
+                print("using duckduckgo api")
+                url_text = "https://duckduckgo.com/?q=" + url_text
+            else:
+                print("reaching website")`

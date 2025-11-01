@@ -49,7 +49,8 @@ Or You can use the not very safe but quick way by doing
 frist you have to clone the py file by doing
 > ```git clone https://github.com/mada748/MinimalBrowser/releases/download/linux/browser_py.py```
 ### Install venv
-do > ```sudo apt update``` and ```sudo apt install python3-venv```
+do 
+> ```sudo apt update``` and ```sudo apt install python3-venv```
 ### executing venv
 for executing venv you need to run 
 > ```python3 -m venv my_env``` and ```source my_env/bin/activate```

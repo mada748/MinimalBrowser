@@ -16,7 +16,7 @@ and execute the file :D
 ## Linux Guide
 ## Universal Guide
 clone the release of the linux app by doing 
-```git clone https://github.com/mada748/MinimalBrowser/releases/download/linux/browser_linux```
+```go tò the latest release and install the browser_linux file```
 ## "Bash" Way Guide
 now using bash you have two options:
 To use The Safe Way And Review the Code manually by doing:
@@ -59,4 +59,4 @@ everthing is set up for running just run ```python3 browser.py```
 
 ## Things not implemented yet
 Bookmarks saving
-
+Session token saving 

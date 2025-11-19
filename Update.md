@@ -37,3 +37,5 @@ some bug fixes mainly involving
                 url_text = "https://duckduckgo.com/?q=" + url_text
             else:
                 print("reaching website")`
+# 19/11/2025 <a href="https://minimalsite-zeta.vercel.app/Update">RSS Feed got shut up</a>
+we killed him im sorry we had to it was not shutting up about "Invalid XML"

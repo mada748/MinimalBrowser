@@ -39,3 +39,5 @@ some bug fixes mainly involving
                 print("reaching website")`
 # 19/11/2025 <a href="https://minimalsite-zeta.vercel.app/Update">RSS Feed got shut up</a>
 we killed him im sorry we had to it was not shutting up about "Invalid XML"
+# 12/12/2025 1.2.2 | HEY DUDES CECK OUT THIS WINDOWS VERSION!!!
+WE GOT THE WINZOZ VERSION WINDOWS WINDOWS I WANT A WINDOW AND THROW THE APPLE OUT OF THE WINDOW. also some bug fixes

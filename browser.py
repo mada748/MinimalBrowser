@@ -1,10 +1,35 @@
-import sys
 import os
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineProfile
-from PyQt5.QtWebEngineCore import QWebEngineUrlRequestInfo, QWebEngineUrlRequestInterceptor
-from PyQt5.QtWebEngineWidgets import QWebEngineDownloadItem
-from PyQt5.QtCore import QUrl, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QLineEdit, QAction, QMessageBox, QVBoxLayout, QWidget, QListWidget, QListWidgetItem, QPushButton, QHBoxLayout, QStackedWidget, QDockWidget, QFileDialog, QProgressBar, QLabel
+import sys
+
+from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtWebEngineCore import (
+    QWebEngineUrlRequestInfo,
+    QWebEngineUrlRequestInterceptor,
+)
+from PyQt5.QtWebEngineWidgets import (
+    QWebEngineDownloadItem,
+    QWebEngineProfile,
+    QWebEngineView,
+)
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QDockWidget,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMainWindow,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QStackedWidget,
+    QToolBar,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class AdBlockerInterceptor(QWebEngineUrlRequestInterceptor):
@@ -155,17 +180,24 @@ class AdBlockerInterceptor(QWebEngineUrlRequestInterceptor):
             "offerwall.yandex.net",
             "udc.yahoo.com",
             "advretising.yahoo.com",
-            "advertising.apple.com"
+            "advertising.apple.com",
         ]
+
     # adblocker logic btw
-    def interceptRequest(self, info: QWebEngineUrlRequestInfo):# the code works who the dablocker says if you are X ad domain im gonna shoot
+    def interceptRequest(
+        self, info: QWebEngineUrlRequestInfo
+    ):  # the code works who the dablocker says if you are X ad domain im gonna shoot
         url = info.requestUrl().host()
-        if any(ad_domain in url for ad_domain in self.ad_domains):# since the site doesn't respond it checks if he needs to shoot
-            print("AdBlocker: Blocking request to", url)# and if yes it shoots
+        if any(
+            ad_domain in url for ad_domain in self.ad_domains
+        ):  # since the site doesn't respond it checks if he needs to shoot
+            print("AdBlocker: Blocking request to", url)  # and if yes it shoots
             info.block(True)
+
 
 class DevToolsWindow(QMainWindow):
     """A separate window for the DevTools QWebEngineView."""
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Developer Tools")
@@ -192,16 +224,20 @@ class DevToolsWindow(QMainWindow):
 class WebBrowser(QMainWindow):
     def __init__(self):
         super().__init__()
-        
+
         self.setWindowTitle("PyQtWebEngine Browser")
         self.setGeometry(100, 100, 1000, 700)
-        
+
         self.bookmarks = {}
-        
+
         self.profile = QWebEngineProfile.defaultProfile()
-        self.profile.setPersistentCookiesPolicy(QWebEngineProfile.ForcePersistentCookies)
-        self.profile.setPersistentStoragePath(os.path.join(os.path.expanduser('~'), '.minimal_browser_data'))
-        
+        self.profile.setPersistentCookiesPolicy(
+            QWebEngineProfile.ForcePersistentCookies
+        )
+        self.profile.setPersistentStoragePath(
+            os.path.join(os.path.expanduser("~"), ".minimal_browser_data")
+        )
+
         self.interceptor = AdBlockerInterceptor(self.profile)
         self.profile.setUrlRequestInterceptor(self.interceptor)
 
@@ -221,10 +257,10 @@ class WebBrowser(QMainWindow):
 
         self.tab_list_widget = QListWidget()
         self.tab_list_widget.itemClicked.connect(self.select_tab_from_sidebar)
-        
+
         new_tab_btn_sidebar = QPushButton("New Tab")
         new_tab_btn_sidebar.clicked.connect(lambda: self.new_tab())
-        
+
         remove_tab_btn_sidebar = QPushButton("Remove Tab")
         remove_tab_btn_sidebar.clicked.connect(self.remove_current_tab)
 
@@ -234,134 +270,151 @@ class WebBrowser(QMainWindow):
 
         sidebar_layout.addWidget(self.tab_list_widget)
         sidebar_layout.addLayout(button_layout)
-        
+
         # --- buttons and navigation ---
 
         # navigation bar
         self.sidebar_dock.setWidget(sidebar_content_widget)
         self.navigation_bar = QToolBar("Navigation")
         self.addToolBar(self.navigation_bar)
-        
+
         # back
         back_btn = QAction("Back", self)
         back_btn.triggered.connect(self.back_to_tab)
         self.navigation_bar.addAction(back_btn)
-        
+
         # going forward (only works if you pressed self.back_to_tab)
         forward_btn = QAction("Forward", self)
         forward_btn.triggered.connect(self.forward_on_tab)
         self.navigation_bar.addAction(forward_btn)
-        
+
         # realoading
         reload_btn = QAction("Reload", self)
         reload_btn.triggered.connect(self.reload_tab)
         self.navigation_bar.addAction(reload_btn)
-        
+
         # stop loading
         stop_btn = QAction("Stop", self)
         stop_btn.triggered.connect(self.stop_tab)
         self.navigation_bar.addAction(stop_btn)
 
-        # Sidebar 
+        # Sidebar
         toggle_sidebar_btn = QAction("Toggle Sidebar", self)
-        toggle_sidebar_btn.triggered.connect(self.sidebar_dock.toggleViewAction().trigger)
+        toggle_sidebar_btn.triggered.connect(
+            self.sidebar_dock.toggleViewAction().trigger
+        )
         self.navigation_bar.addAction(toggle_sidebar_btn)
-        
+
         # homepage
         homepage_btn = QAction("Homepage", self)
-        homepage_btn.triggered.connect(lambda: self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/')))
+        homepage_btn.triggered.connect(
+            lambda: self.new_tab(QUrl("https://minimalbrowserhomepage.netlify.app/"))
+        )
         self.navigation_bar.addAction(homepage_btn)
-        
+
         # Bookmarking (what term is even this)
         add_bookmark_btn = QAction("Add Bookmark", self)
         add_bookmark_btn.triggered.connect(self.add_bookmark)
         self.navigation_bar.addAction(add_bookmark_btn)
-        
-        # Bookmarks 
+
+        # Bookmarks
         show_bookmarks_btn = QAction("Bookmarks", self)
         show_bookmarks_btn.triggered.connect(self.show_bookmarks_list)
         self.navigation_bar.addAction(show_bookmarks_btn)
-        
 
         self.dev_tools_action = QAction("Toggle DevTools", self)
         self.dev_tools_action.triggered.connect(self.toggle_dev_tools)
-        # shourtcut F12 
-        self.dev_tools_action.setShortcut(Qt.Key_F12) 
-        self.addAction(self.dev_tools_action) 
+        # shourtcut F12
+        self.dev_tools_action.setShortcut(Qt.Key_F12)
+        self.addAction(self.dev_tools_action)
 
         self.url_bar = QLineEdit()
         self.url_bar.returnPressed.connect(self.navigate_to_url)
         self.navigation_bar.addWidget(self.url_bar)
-        
+
         self.dev_tools_window = DevToolsWindow(self)
 
         # - New tab stuff -
-        self.new_tab(QUrl('https://minimalbrowserhomepage.netlify.app/'))
-        
+        self.new_tab(QUrl("https://minimalsite-zeta.vercel.app/API/homepage"))
+
     def new_tab(self, qurl=None):
         if qurl is None:
-            qurl = QUrl('https://minimalbrowserhomepage.netlify.app/')
-        
+            qurl = QUrl("https://minimalsite-zeta.vercel.app/API/homepage")
+
         browser = QWebEngineView()
         browser.setUrl(qurl)
-        
+
         index = self.web_view_stack.addWidget(browser)
-        
+
         item = QListWidgetItem("New Tab")
         self.tab_list_widget.addItem(item)
 
-        
         self.web_view_stack.setCurrentIndex(index)
         self.tab_list_widget.setCurrentItem(item)
-        
-        browser.urlChanged.connect(lambda url, browser=browser: self.update_url_bar(url, browser))
-        browser.loadProgress.connect(lambda progress, browser=browser: self.update_progress(progress, browser))
-        browser.titleChanged.connect(lambda title, browser=browser: self.tab_list_widget.item(self.web_view_stack.indexOf(browser)).setText(title))
-        browser.iconChanged.connect(lambda icon, browser=browser: self.tab_list_widget.item(self.web_view_stack.indexOf(browser)).setIcon(icon))
-        
+
+        browser.urlChanged.connect(
+            lambda url, browser=browser: self.update_url_bar(url, browser)
+        )
+        browser.loadProgress.connect(
+            lambda progress, browser=browser: self.update_progress(progress, browser)
+        )
+        browser.titleChanged.connect(
+            lambda title, browser=browser: self.tab_list_widget.item(
+                self.web_view_stack.indexOf(browser)
+            ).setText(title)
+        )
+        browser.iconChanged.connect(
+            lambda icon, browser=browser: self.tab_list_widget.item(
+                self.web_view_stack.indexOf(browser)
+            ).setIcon(icon)
+        )
+
         self.web_view_stack.currentChanged.connect(self.current_tab_changed)
-        
+
     # devtools let's gooooooooooooooooooooooo
     def toggle_dev_tools(self):
         current_browser = self.web_view_stack.currentWidget()
         if not current_browser:
             return
-    
+
         if self.dev_tools_window.isVisible():
             current_browser.page().setDevToolsPage(None)
             self.dev_tools_window.hide()
-            
-            # btw this is a fix beacuse after closing devtools 
+
+            # btw this is a fix beacuse after closing devtools
             current_browser.setFocus()
         else:
-            current_browser.page().setDevToolsPage(self.dev_tools_window.dev_tools_view.page())
+            current_browser.page().setDevToolsPage(
+                self.dev_tools_window.dev_tools_view.page()
+            )
             self.dev_tools_window.show()
-            self.dev_tools_window.activateWindow() 
+            self.dev_tools_window.activateWindow()
 
-
-    # - Removing tab stuff (work in progress) -   
+    # - Removing tab stuff (work in progress) -
     def remove_current_tab(self):
         if self.web_view_stack.count() < 2:
-            QMessageBox.information(self, "Tab Menager", "Last tab closed extiting with code 0...")
-            # If DevTools is open, close it before exiting
-            if self.dev_tools_window.isVisible():
-                self.toggle_dev_tools() 
-            SHUTDOWN = True
-            exit()
+            QMessageBox.information(
+                self,
+                "Hey! Do not do that",
+                "don't make me do extra work for this just dod not close the last tab",
+            )
             return
 
         current_index = self.web_view_stack.currentIndex()
-        
+
         widget_to_remove = self.web_view_stack.widget(current_index)
-        
-        if self.dev_tools_window.isVisible() and widget_to_remove.page() == self.web_view_stack.currentWidget().page():
-             self.toggle_dev_tools()
+
+        if (
+            self.dev_tools_window.isVisible()
+            and widget_to_remove.page() == self.web_view_stack.currentWidget().page()
+        ):
+            self.toggle_dev_tools()
 
         self.web_view_stack.removeWidget(widget_to_remove)
         widget_to_remove.deleteLater()
-        
+
         self.tab_list_widget.takeItem(current_index)
-        
+
         if self.web_view_stack.count() > 0:
             if current_index >= self.web_view_stack.count():
                 new_index = self.web_view_stack.count() - 1
@@ -389,22 +442,28 @@ class WebBrowser(QMainWindow):
                 url_text = "https://duckduckgo.com/?q=" + url_text
             else:
                 print("reaching website")
-            
+
             current_browser.setUrl(QUrl(url_text))
 
     def Httpwarning(self, url_text):
         if url_text.startswith("http://"):
-            QMessageBox.warning(self, "Insecure Connection", f"The site {url_text} is not safe and it may track or steal your data.")
-            print(f"SiteProtection: Warning user conneecting to insecure site {url_text}")
-        
+            QMessageBox.warning(
+                self,
+                "Insecure Connection",
+                f"The site {url_text} is not safe and it may track or steal your data.",
+            )
+            print(
+                f"SiteProtection: Warning user conneecting to insecure site {url_text}"
+            )
+
     def close_current_tab(self, index):
         if self.web_view_stack.count() < 2:
             return
-            
+
         widget_to_remove = self.web_view_stack.widget(index)
         self.web_view_stack.removeWidget(widget_to_remove)
         widget_to_remove.deleteLater()
-        
+
         self.tab_list_widget.takeItem(index)
 
     def current_tab_changed(self, index):
@@ -412,24 +471,24 @@ class WebBrowser(QMainWindow):
         if current_browser:
             self.update_url_bar(current_browser.url(), current_browser)
             self.setWindowTitle(current_browser.title())
-            
+
             # devs tools scary!
             if self.dev_tools_window.isVisible():
-                current_browser.page().setDevToolsPage(self.dev_tools_window.dev_tools_view.page())
-
-
+                current_browser.page().setDevToolsPage(
+                    self.dev_tools_window.dev_tools_view.page()
+                )
 
     def update_url_bar(self, url, browser=None):
         if browser != self.web_view_stack.currentWidget():
             return
-        
+
         self.url_bar.setText(url.toString())
         self.url_bar.setCursorPosition(0)
 
     def update_progress(self, progress, browser=None):
         if browser != self.web_view_stack.currentWidget():
             return
-        
+
         if progress < 100:
             self.statusBar().showMessage(f"Loading... {progress}%")
         else:
@@ -439,7 +498,7 @@ class WebBrowser(QMainWindow):
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             current_browser.back()
-            
+
     def forward_on_tab(self):
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
@@ -454,7 +513,7 @@ class WebBrowser(QMainWindow):
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             current_browser.stop()
-    
+
     def add_bookmark(self):
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
@@ -462,42 +521,46 @@ class WebBrowser(QMainWindow):
             title = current_browser.title()
             if url not in self.bookmarks:
                 self.bookmarks[url] = title
-                QMessageBox.information(self, "Bookmark Added", f"Added '{title}' to bookmarks.")
+                QMessageBox.information(
+                    self, "Bookmark Added", f"Added '{title}' to bookmarks."
+                )
             else:
-                QMessageBox.warning(self, "Bookmark Exists", "This page is already bookmarked.")
+                QMessageBox.warning(
+                    self, "Bookmark Exists", "This page is already bookmarked."
+                )
 
     def show_bookmarks_list(self):
         self.bookmark_window = QWidget()
         self.bookmark_window.setWindowTitle("Bookmarks")
         self.bookmark_window.setGeometry(200, 200, 400, 300)
-        
+
         main_layout = QVBoxLayout()
         list_layout = QVBoxLayout()
         button_layout = QHBoxLayout()
-        
+
         self.bookmark_list = QListWidget()
-        
+
         for url, title in self.bookmarks.items():
             item = QListWidgetItem(f"{title} - {url}")
             item.setData(0, url)
             self.bookmark_list.addItem(item)
-        
+
         self.bookmark_list.itemDoubleClicked.connect(self.open_bookmark)
-        
+
         list_layout.addWidget(self.bookmark_list)
         main_layout.addLayout(list_layout)
-        
+
         self.bookmark_window.setLayout(main_layout)
         self.bookmark_window.show()
 
     def open_bookmark(self, item):
         url = item.data(0)
         self.new_tab(QUrl(url))
-        self.bookmark_window.close() # Close bookmark window after opening
+        self.bookmark_window.close()  # Close bookmark window after opening
 
     def handle_download_requested(self, download):
         suggested_filename = download.downloadFileName()
-        
+
         # Ask user where to save
         path, _ = QFileDialog.getSaveFileName(self, "Save File", suggested_filename)
         if path:
@@ -512,9 +575,9 @@ class WebBrowser(QMainWindow):
             progress_bar.setValue(0)
             layout.addWidget(label)
             layout.addWidget(progress_bar)
-            
+
             # Add to download window
-            if not hasattr(self, 'download_window') or not self.download_window:
+            if not hasattr(self, "download_window") or not self.download_window:
                 self.download_window = QWidget()
                 self.download_window.setWindowTitle("Downloads")
                 self.download_window.setGeometry(300, 300, 400, 300)
@@ -525,8 +588,14 @@ class WebBrowser(QMainWindow):
             self.download_window.show()
 
             # Update progress
-            download.downloadProgress.connect(lambda received, total: self.update_download_progress(progress_bar, received, total))
-            download.finished.connect(lambda: self.download_finished(download, progress_bar, label))
+            download.downloadProgress.connect(
+                lambda received, total: self.update_download_progress(
+                    progress_bar, received, total
+                )
+            )
+            download.finished.connect(
+                lambda: self.download_finished(download, progress_bar, label)
+            )
         else:
             download.cancel()
 
@@ -538,18 +607,24 @@ class WebBrowser(QMainWindow):
     def download_finished(self, download, progress_bar, label):
         if download.state() == download.DownloadCompleted:
             label.setText(f"Download completed: {os.path.basename(download.path())}")
-            print("Download", {os.path.basename(download.path())}, "In", {download.path()})
-            QMessageBox.information(self, "Download Completed", f"File saved to:\n{download.path()}")
+            print(
+                "Download", {os.path.basename(download.path())}, "In", {download.path()}
+            )
+            QMessageBox.information(
+                self, "Download Completed", f"File saved to:\n{download.path()}"
+            )
         elif download.state() == download.DownloadCancelled:
             label.setText("Download cancelled.")
         elif download.state() == download.DownloadInterrupted:
             label.setText("Download interrupted.")
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setApplicationName("Minimalist")
-    
+
     main_window = WebBrowser()
     main_window.show()
-    
+
     sys.exit(app.exec_())
+

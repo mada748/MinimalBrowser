@@ -11,7 +11,7 @@ https://minimalsite-zeta.vercel.app
 
 ## How to install
 ## Windows Guide
-Go to <a href="https://github.com/mada748/MinimalBrowser/releases/download/Iwasforcedtodothistag/browser.exe">This link</a> 
+Go to <a href="https://github.com/mada748/MinimalBrowser/releases/download/latest">This link</a> 
 and execute the file :D
 ## Linux Guide
 ## Universal Guide

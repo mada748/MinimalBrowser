@@ -41,5 +41,5 @@ some bug fixes mainly involving
 we killed him im sorry we had to it was not shutting up about "Invalid XML"
 # 12/12/2025 <a href="https://github.com/mada748/MinimalBrowser/releases/tag/windows">1.2.2 | HEY DUDES CHECK OUT THIS WINDOWS VERSION!!!</a>
 WE GOT THE WINZOZ VERSION WINDOWS WINDOWS I WANT A WINDOW AND THROW THE APPLE OUT OF THE WINDOW. also some bug fixes
-# 21/12/2025 <a href="https://github.com/mada748/MinimalBrowser/releases/tag/2.0> 2.0 | PyQt6 BABY!!!</a>
+# 21/12/2025 <a href="https://github.com/mada748/MinimalBrowser/releases/tag/2.0>2.0 | PyQt6 BABY!!!</a>
 WE GOT PYQT6 THAT'S GREAT ALSO I COULD NOT GET THE DISPLAY OF THE WSL SO IM GONNA ACT LIKE BOTH ON WINDOWS AND LINUX THEY ARE BEAUTIFUL!!! (on windows it technoglicaly UI nightmare sorry for all of you UI/UX designers out there)

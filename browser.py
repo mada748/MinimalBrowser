@@ -1,29 +1,26 @@
 import os
 import sys
 
-from PyQt5.QtCore import Qt, QUrl
-from PyQt5.QtWebEngineCore import (
+from PyQt6.QtCore import Qt, QUrl
+from PyQt6.QtGui import QAction
+from PyQt6.QtWebEngineCore import (
+    QWebEngineProfile,
     QWebEngineUrlRequestInfo,
     QWebEngineUrlRequestInterceptor,
 )
-from PyQt5.QtWebEngineWidgets import (
-    QWebEngineDownloadItem,
-    QWebEngineProfile,
+from PyQt6.QtWebEngineWidgets import (
     QWebEngineView,
 )
-from PyQt5.QtWidgets import (
-    QAction,
+from PyQt6.QtWidgets import (
     QApplication,
     QDockWidget,
     QFileDialog,
     QHBoxLayout,
-    QLabel,
     QLineEdit,
     QListWidget,
     QListWidgetItem,
     QMainWindow,
     QMessageBox,
-    QProgressBar,
     QPushButton,
     QStackedWidget,
     QToolBar,
@@ -183,35 +180,25 @@ class AdBlockerInterceptor(QWebEngineUrlRequestInterceptor):
             "advertising.apple.com",
         ]
 
-    # adblocker logic btw
-    def interceptRequest(
-        self, info: QWebEngineUrlRequestInfo
-    ):  # the code works who the dablocker says if you are X ad domain im gonna shoot
+    def interceptRequest(self, info: QWebEngineUrlRequestInfo):
         url = info.requestUrl().host()
-        if any(
-            ad_domain in url for ad_domain in self.ad_domains
-        ):  # since the site doesn't respond it checks if he needs to shoot
-            print("AdBlocker: Blocking request to", url)  # and if yes it shoots
+        if any(ad_domain in url for ad_domain in self.ad_domains):
+            print("AdBlocker: Blocking request to", url)
             info.block(True)
 
 
 class DevToolsWindow(QMainWindow):
-    """A separate window for the DevTools QWebEngineView."""
-
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Developer Tools")
         self.setGeometry(150, 150, 800, 600)
         self.dev_tools_view = QWebEngineView()
         self.setCentralWidget(self.dev_tools_view)
-        # Handle close event to simply hide the window instead of destroying it
-        self.setAttribute(Qt.WA_DeleteOnClose, False)
-        # Store a reference to the main browser for toggling
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
         self.main_browser = parent
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_F12 and self.main_browser:
-            # Tell the main window to toggle the DevTools
+        if event.key() == Qt.Key.Key_F12 and self.main_browser:
             self.main_browser.toggle_dev_tools()
         super().keyPressEvent(event)
 
@@ -225,14 +212,15 @@ class WebBrowser(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("PyQtWebEngine Browser")
+        self.setWindowTitle("PyQt6 WebEngine Browser")
         self.setGeometry(100, 100, 1000, 700)
 
         self.bookmarks = {}
 
+        # PyQt6: Accessing the profile
         self.profile = QWebEngineProfile.defaultProfile()
         self.profile.setPersistentCookiesPolicy(
-            QWebEngineProfile.ForcePersistentCookies
+            QWebEngineProfile.PersistentCookiesPolicy.ForcePersistentCookies
         )
         self.profile.setPersistentStoragePath(
             os.path.join(os.path.expanduser("~"), ".minimal_browser_data")
@@ -240,16 +228,17 @@ class WebBrowser(QMainWindow):
 
         self.interceptor = AdBlockerInterceptor(self.profile)
         self.profile.setUrlRequestInterceptor(self.interceptor)
-
-        # Connecting downloading stuff do not matter
         self.profile.downloadRequested.connect(self.handle_download_requested)
 
         self.web_view_stack = QStackedWidget()
         self.setCentralWidget(self.web_view_stack)
 
         self.sidebar_dock = QDockWidget("Tabs", self)
-        self.sidebar_dock.setFeatures(QDockWidget.NoDockWidgetFeatures)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.sidebar_dock)
+        self.sidebar_dock.setFeatures(
+            QDockWidget.DockWidgetFeature.NoDockWidgetFeatures
+        )
+        # PyQt6: Enum scoping changed
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.sidebar_dock)
         self.sidebar_dock.setFixedWidth(200)
 
         sidebar_content_widget = QWidget()
@@ -271,61 +260,52 @@ class WebBrowser(QMainWindow):
         sidebar_layout.addWidget(self.tab_list_widget)
         sidebar_layout.addLayout(button_layout)
 
-        # --- buttons and navigation ---
-
-        # navigation bar
         self.sidebar_dock.setWidget(sidebar_content_widget)
         self.navigation_bar = QToolBar("Navigation")
         self.addToolBar(self.navigation_bar)
 
-        # back
+        # Navigation Actions
         back_btn = QAction("Back", self)
         back_btn.triggered.connect(self.back_to_tab)
         self.navigation_bar.addAction(back_btn)
 
-        # going forward (only works if you pressed self.back_to_tab)
         forward_btn = QAction("Forward", self)
         forward_btn.triggered.connect(self.forward_on_tab)
         self.navigation_bar.addAction(forward_btn)
 
-        # realoading
         reload_btn = QAction("Reload", self)
         reload_btn.triggered.connect(self.reload_tab)
         self.navigation_bar.addAction(reload_btn)
 
-        # stop loading
         stop_btn = QAction("Stop", self)
         stop_btn.triggered.connect(self.stop_tab)
         self.navigation_bar.addAction(stop_btn)
 
-        # Sidebar
         toggle_sidebar_btn = QAction("Toggle Sidebar", self)
         toggle_sidebar_btn.triggered.connect(
             self.sidebar_dock.toggleViewAction().trigger
         )
         self.navigation_bar.addAction(toggle_sidebar_btn)
 
-        # homepage
         homepage_btn = QAction("Homepage", self)
         homepage_btn.triggered.connect(
-            lambda: self.new_tab(QUrl("https://minimalbrowserhomepage.netlify.app/"))
+            lambda: self.new_tab(
+                QUrl("https://minimalsite-zeta.vercel.app/API/homepage")
+            )
         )
         self.navigation_bar.addAction(homepage_btn)
 
-        # Bookmarking (what term is even this)
         add_bookmark_btn = QAction("Add Bookmark", self)
         add_bookmark_btn.triggered.connect(self.add_bookmark)
         self.navigation_bar.addAction(add_bookmark_btn)
 
-        # Bookmarks
         show_bookmarks_btn = QAction("Bookmarks", self)
         show_bookmarks_btn.triggered.connect(self.show_bookmarks_list)
         self.navigation_bar.addAction(show_bookmarks_btn)
 
         self.dev_tools_action = QAction("Toggle DevTools", self)
         self.dev_tools_action.triggered.connect(self.toggle_dev_tools)
-        # shourtcut F12
-        self.dev_tools_action.setShortcut(Qt.Key_F12)
+        self.dev_tools_action.setShortcut(Qt.Key.Key_F12)
         self.addAction(self.dev_tools_action)
 
         self.url_bar = QLineEdit()
@@ -333,8 +313,6 @@ class WebBrowser(QMainWindow):
         self.navigation_bar.addWidget(self.url_bar)
 
         self.dev_tools_window = DevToolsWindow(self)
-
-        # - New tab stuff -
         self.new_tab(QUrl("https://minimalsite-zeta.vercel.app/API/homepage"))
 
     def new_tab(self, qurl=None):
@@ -345,33 +323,29 @@ class WebBrowser(QMainWindow):
         browser.setUrl(qurl)
 
         index = self.web_view_stack.addWidget(browser)
-
         item = QListWidgetItem("New Tab")
         self.tab_list_widget.addItem(item)
 
         self.web_view_stack.setCurrentIndex(index)
         self.tab_list_widget.setCurrentItem(item)
 
-        browser.urlChanged.connect(
-            lambda url, browser=browser: self.update_url_bar(url, browser)
-        )
-        browser.loadProgress.connect(
-            lambda progress, browser=browser: self.update_progress(progress, browser)
-        )
-        browser.titleChanged.connect(
-            lambda title, browser=browser: self.tab_list_widget.item(
-                self.web_view_stack.indexOf(browser)
-            ).setText(title)
-        )
-        browser.iconChanged.connect(
-            lambda icon, browser=browser: self.tab_list_widget.item(
-                self.web_view_stack.indexOf(browser)
-            ).setIcon(icon)
-        )
+        browser.urlChanged.connect(lambda url, b=browser: self.update_url_bar(url, b))
+        browser.loadProgress.connect(lambda p, b=browser: self.update_progress(p, b))
+        browser.titleChanged.connect(lambda t, b=browser: self.update_tab_title(t, b))
+        browser.iconChanged.connect(lambda i, b=browser: self.update_tab_icon(i, b))
 
         self.web_view_stack.currentChanged.connect(self.current_tab_changed)
 
-    # devtools let's gooooooooooooooooooooooo
+    def update_tab_title(self, title, browser):
+        index = self.web_view_stack.indexOf(browser)
+        if index != -1:
+            self.tab_list_widget.item(index).setText(title)
+
+    def update_tab_icon(self, icon, browser):
+        index = self.web_view_stack.indexOf(browser)
+        if index != -1:
+            self.tab_list_widget.item(index).setIcon(icon)
+
     def toggle_dev_tools(self):
         current_browser = self.web_view_stack.currentWidget()
         if not current_browser:
@@ -380,8 +354,6 @@ class WebBrowser(QMainWindow):
         if self.dev_tools_window.isVisible():
             current_browser.page().setDevToolsPage(None)
             self.dev_tools_window.hide()
-
-            # btw this is a fix beacuse after closing devtools
             current_browser.setFocus()
         else:
             current_browser.page().setDevToolsPage(
@@ -390,38 +362,22 @@ class WebBrowser(QMainWindow):
             self.dev_tools_window.show()
             self.dev_tools_window.activateWindow()
 
-    # - Removing tab stuff (work in progress) -
     def remove_current_tab(self):
         if self.web_view_stack.count() < 2:
             QMessageBox.information(
-                self,
-                "Hey! Do not do that",
-                "don't make me do extra work for this just dod not close the last tab",
+                self, "Action Denied", "Cannot close the last remaining tab."
             )
             return
 
         current_index = self.web_view_stack.currentIndex()
-
         widget_to_remove = self.web_view_stack.widget(current_index)
 
-        if (
-            self.dev_tools_window.isVisible()
-            and widget_to_remove.page() == self.web_view_stack.currentWidget().page()
-        ):
+        if self.dev_tools_window.isVisible():
             self.toggle_dev_tools()
 
         self.web_view_stack.removeWidget(widget_to_remove)
         widget_to_remove.deleteLater()
-
         self.tab_list_widget.takeItem(current_index)
-
-        if self.web_view_stack.count() > 0:
-            if current_index >= self.web_view_stack.count():
-                new_index = self.web_view_stack.count() - 1
-            else:
-                new_index = current_index
-            self.web_view_stack.setCurrentIndex(new_index)
-            self.tab_list_widget.setCurrentRow(new_index)
 
     def select_tab_from_sidebar(self, item):
         index = self.tab_list_widget.row(item)
@@ -434,45 +390,24 @@ class WebBrowser(QMainWindow):
             if not url_text:
                 return
 
-            # Check for HTTP warning before navigating
             self.Httpwarning(url_text)
 
             if not url_text.startswith(("http://", "https://")):
-                print("using duckduckgo api")
                 url_text = "https://duckduckgo.com/?q=" + url_text
-            else:
-                print("reaching website")
 
             current_browser.setUrl(QUrl(url_text))
 
     def Httpwarning(self, url_text):
         if url_text.startswith("http://"):
             QMessageBox.warning(
-                self,
-                "Insecure Connection",
-                f"The site {url_text} is not safe and it may track or steal your data.",
+                self, "Insecure Connection", f"The site {url_text} is not secure."
             )
-            print(
-                f"SiteProtection: Warning user conneecting to insecure site {url_text}"
-            )
-
-    def close_current_tab(self, index):
-        if self.web_view_stack.count() < 2:
-            return
-
-        widget_to_remove = self.web_view_stack.widget(index)
-        self.web_view_stack.removeWidget(widget_to_remove)
-        widget_to_remove.deleteLater()
-
-        self.tab_list_widget.takeItem(index)
 
     def current_tab_changed(self, index):
         current_browser = self.web_view_stack.currentWidget()
         if current_browser:
             self.update_url_bar(current_browser.url(), current_browser)
             self.setWindowTitle(current_browser.title())
-
-            # devs tools scary!
             if self.dev_tools_window.isVisible():
                 current_browser.page().setDevToolsPage(
                     self.dev_tools_window.dev_tools_view.page()
@@ -481,150 +416,76 @@ class WebBrowser(QMainWindow):
     def update_url_bar(self, url, browser=None):
         if browser != self.web_view_stack.currentWidget():
             return
-
         self.url_bar.setText(url.toString())
         self.url_bar.setCursorPosition(0)
 
     def update_progress(self, progress, browser=None):
         if browser != self.web_view_stack.currentWidget():
             return
-
         if progress < 100:
             self.statusBar().showMessage(f"Loading... {progress}%")
         else:
             self.statusBar().showMessage("Done", 2000)
 
     def back_to_tab(self):
-        current_browser = self.web_view_stack.currentWidget()
-        if current_browser:
-            current_browser.back()
+        if self.web_view_stack.currentWidget():
+            self.web_view_stack.currentWidget().back()
 
     def forward_on_tab(self):
-        current_browser = self.web_view_stack.currentWidget()
-        if current_browser:
-            current_browser.forward()
+        if self.web_view_stack.currentWidget():
+            self.web_view_stack.currentWidget().forward()
 
     def reload_tab(self):
-        current_browser = self.web_view_stack.currentWidget()
-        if current_browser:
-            current_browser.reload()
+        if self.web_view_stack.currentWidget():
+            self.web_view_stack.currentWidget().reload()
 
     def stop_tab(self):
-        current_browser = self.web_view_stack.currentWidget()
-        if current_browser:
-            current_browser.stop()
+        if self.web_view_stack.currentWidget():
+            self.web_view_stack.currentWidget().stop()
 
     def add_bookmark(self):
-        current_browser = self.web_view_stack.currentWidget()
-        if current_browser:
-            url = current_browser.url().toString()
-            title = current_browser.title()
+        cb = self.web_view_stack.currentWidget()
+        if cb:
+            url = cb.url().toString()
             if url not in self.bookmarks:
-                self.bookmarks[url] = title
-                QMessageBox.information(
-                    self, "Bookmark Added", f"Added '{title}' to bookmarks."
-                )
-            else:
-                QMessageBox.warning(
-                    self, "Bookmark Exists", "This page is already bookmarked."
-                )
+                self.bookmarks[url] = cb.title()
+                QMessageBox.information(self, "Bookmark Added", "Saved!")
 
     def show_bookmarks_list(self):
         self.bookmark_window = QWidget()
         self.bookmark_window.setWindowTitle("Bookmarks")
-        self.bookmark_window.setGeometry(200, 200, 400, 300)
-
-        main_layout = QVBoxLayout()
-        list_layout = QVBoxLayout()
-        button_layout = QHBoxLayout()
-
+        layout = QVBoxLayout(self.bookmark_window)
         self.bookmark_list = QListWidget()
-
         for url, title in self.bookmarks.items():
             item = QListWidgetItem(f"{title} - {url}")
-            item.setData(0, url)
+            item.setData(Qt.ItemDataRole.UserRole, url)  # PyQt6 uses ItemDataRole
             self.bookmark_list.addItem(item)
-
         self.bookmark_list.itemDoubleClicked.connect(self.open_bookmark)
-
-        list_layout.addWidget(self.bookmark_list)
-        main_layout.addLayout(list_layout)
-
-        self.bookmark_window.setLayout(main_layout)
+        layout.addWidget(self.bookmark_list)
         self.bookmark_window.show()
 
     def open_bookmark(self, item):
-        url = item.data(0)
+        url = item.data(Qt.ItemDataRole.UserRole)
         self.new_tab(QUrl(url))
-        self.bookmark_window.close()  # Close bookmark window after opening
+        self.bookmark_window.close()
 
+    # downloads
     def handle_download_requested(self, download):
-        suggested_filename = download.downloadFileName()
-
-        # Ask user where to save
-        path, _ = QFileDialog.getSaveFileName(self, "Save File", suggested_filename)
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Save File", download.downloadFileName()
+        )
         if path:
-            download.setPath(path)
+            download.setDownloadDirectory(os.path.dirname(path))
+            download.setDownloadFileName(os.path.basename(path))
             download.accept()
 
-            # Create a download widget
-            download_widget = QWidget()
-            layout = QVBoxLayout(download_widget)
-            label = QLabel(f"Downloading: {os.path.basename(path)}")
-            progress_bar = QProgressBar()
-            progress_bar.setValue(0)
-            layout.addWidget(label)
-            layout.addWidget(progress_bar)
-
-            # Add to download window
-            if not hasattr(self, "download_window") or not self.download_window:
-                self.download_window = QWidget()
-                self.download_window.setWindowTitle("Downloads")
-                self.download_window.setGeometry(300, 300, 400, 300)
-                self.download_layout = QVBoxLayout(self.download_window)
-                self.download_window.setLayout(self.download_layout)
-
-            self.download_layout.addWidget(download_widget)
-            self.download_window.show()
-
-            # Update progress
-            download.downloadProgress.connect(
-                lambda received, total: self.update_download_progress(
-                    progress_bar, received, total
-                )
-            )
-            download.finished.connect(
-                lambda: self.download_finished(download, progress_bar, label)
-            )
         else:
             download.cancel()
-
-    def update_download_progress(self, progress_bar, received, total):
-        if total > 0:
-            progress = int((received / total) * 100)
-            progress_bar.setValue(progress)
-
-    def download_finished(self, download, progress_bar, label):
-        if download.state() == download.DownloadCompleted:
-            label.setText(f"Download completed: {os.path.basename(download.path())}")
-            print(
-                "Download", {os.path.basename(download.path())}, "In", {download.path()}
-            )
-            QMessageBox.information(
-                self, "Download Completed", f"File saved to:\n{download.path()}"
-            )
-        elif download.state() == download.DownloadCancelled:
-            label.setText("Download cancelled.")
-        elif download.state() == download.DownloadInterrupted:
-            label.setText("Download interrupted.")
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setApplicationName("Minimalist")
-
+    app.setApplicationName("Minimalist PyQt6")
     main_window = WebBrowser()
     main_window.show()
-
-    sys.exit(app.exec_())
-
+    sys.exit(app.exec())

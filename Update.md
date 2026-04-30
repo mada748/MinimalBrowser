@@ -43,3 +43,5 @@ we killed him im sorry we had to it was not shutting up about "Invalid XML"
 WE GOT THE WINZOZ VERSION WINDOWS WINDOWS I WANT A WINDOW AND THROW THE APPLE OUT OF THE WINDOW. also some bug fixes
 # 21/12/2025 <a href="https://github.com/mada748/MinimalBrowser/releases/tag/2.0">2.0 | PyQt6 BABY!!!</a>
 WE GOT PYQT6 THAT'S GREAT ALSO I COULD NOT GET THE DISPLAY OF THE WSL SO IM GONNA ACT LIKE BOTH ON WINDOWS AND LINUX THEY ARE BEAUTIFUL!!! (on windows it technoglicaly UI nightmare sorry for all of you UI/UX designers out there)
+# 4/30/2026 Leaving github
+im leaving github since i can't physically rely on it, one day it is running with 10s of lag another day it isn't even running and im going insane so for now this project will be moved from github to another platform (Not Gitlab btw i know it's good but i do not like it) wait for another update.

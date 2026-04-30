@@ -1,3 +1,5 @@
+<h1>This repository is not gonna be updated again, please watch the Update.md for further information</h1>
+
 <img src="https://stonecode-assets.netlify.app/browser.png">
 
 

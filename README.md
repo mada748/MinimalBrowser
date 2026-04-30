@@ -1,4 +1,4 @@
-<h1>This repository is not gonna be updated again, please watch the Update.md for further information</h1>
+<h1>This repository is not gonna be updated again (ON GITHUB), please watch the Update.md for further information and where you can access the full version</h1>
 
 <img src="https://stonecode-assets.netlify.app/browser.png">
 
